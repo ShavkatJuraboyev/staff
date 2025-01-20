@@ -1,0 +1,265 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+{% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- DataTable with Buttons -->
+    <div class="card">
+        <div class="card-datatable table-responsive">
+            <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                <div class="card-header flex-column flex-md-row pb-0">
+                    <div class="head-label text-center">
+                        <h5 class="card-title mb-0">Ma'lumotlar</h5>
+                    </div>
+                    <div class="dt-action-buttons text-end pt-6 pt-md-0">
+                        <div class="dt-buttons btn-group flex-wrap">
+                            <a href="{% url 'add_employees' %}" class="btn btn-secondary create-new btn-primary"
+                                style="color: aliceblue;">
+                                <span>
+                                    <i class="bx bx-plus bx-sm me-sm-2"></i>
+                                    <span class="d-none d-sm-inline-block">Ma'lumot qo'shish</span>
+                                </span>
+                            </a> &nbsp;
+                            <a href="{% url 'upload_excel' %}" class="btn btn-secondary create-new btn-primary" style="color: aliceblue;">
+                                <span>
+                                    <i class='bx bxs-file'></i>
+                                    <span class="d-none d-sm-inline-block">fayl orqali qo'shish</span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <div class="dataTables_length" id="DataTables_Table_0_length">
+                            <form id="pageSizeForm" method="get">
+                                {% csrf_token %}
+                                <label>
+                                    Sahifadagi elementlar soni:
+                                    <select name="page_size" aria-controls="DataTables_Table_0" class="form-select"
+                                        id="pageSize">
+                                        <option value="7" {% if request.GET.page_size == "7" %}selected{% endif %}>7
+                                        </option>
+                                        <option value="10" {% if request.GET.page_size == "10" %}selected{% endif %}>10
+                                        </option>
+                                        <option value="25" {% if request.GET.page_size == "25" %}selected{% endif %}>25
+                                        </option>
+                                        <option value="50" {% if request.GET.page_size == "50" %}selected{% endif %}>50
+                                        </option>
+                                        <option value="75" {% if request.GET.page_size == "75" %}selected{% endif %}>75
+                                        </option>
+                                        <option value="100" {% if request.GET.page_size == "100" %}selected{% endif %}>
+                                            100</option>
+                                    </select>
+                                </label>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end mt-n6 mt-md-0">
+                        <form method="get" action="#">
+                            <div id="DataTables_Table_0_filter" class="dataTables_filter">
+                                <label>Qidirish:
+                                    <input type="search" name="q" class="form-control" placeholder="qidirish..."
+                                        aria-controls="DataTables_Table_0">
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <table class="dt-complex-header table table-bordered dataTable no-footer" id="DataTables_Table_1"
+                    aria-describedby="DataTables_Table_1_info" style="width: 1392px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 20px;">T/R</th>
+                            <th style="width: 88px;">Xodim ID</th>
+                            <th>Xodimlar F.I.O</th>
+                            <th>Telefoni</th>
+                            <th>Tug'ulgan yili</th>
+                            <th>Yoshi</th>
+                            <th>Stavkasi</th>
+                            <th>Mexnat shakli</th>
+                            <th>Jinsi</th>
+                            <th class="sorting_disabled" style="width: 88px;">Harakat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="content">
+                        {% for employee_data in page_obj %}
+                        <tr>
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+                            <td>
+                                {{ employee_data.employee_id }} 
+                            </td>
+                            <td>
+                                <a href="#">
+                                    <div class="d-flex justify-content-start align-items-center user-name">
+                                        <div class="d-flex flex-column"><span
+                                                class="emp_name text-truncate">{{ employee_data.last_name }} {{ employee_data.frist_name }}</span><small
+                                                class="emp_post text-truncate text-muted">{{employee_data.sur_name}}</small></div>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                {{employee_data.phone}}
+                            </td>
+                            <td>
+                                {{employee_data.bithday}}
+                            </td>
+                            <td>
+                                {{employee_data.age}}
+                            </td>
+                            <td>
+                                {{employee_data.stavka}}
+                            </td>
+                            <td>
+                                {{employee_data.labor_form}}
+                            </td>
+                            <td>
+                                {{employee_data.gender}}
+                            </td>
+                            
+                            <td>
+                                <div class="d-inline-block"><a href="javascript:;"
+                                        class="btn btn-icon dropdown-toggle hide-arrow me-1"
+                                        data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded bx-md"></i></a>
+                                    <div class="dropdown-menu dropdown-menu-end m-0">
+                                        <a href="{% url 'view_employees' employee_data.employee_id %}" class="dropdown-item">Ko'rish <i class="bx bx-show bx-md"></i></a>
+                                        <a href="{% url 'edit_employees' employee_data.employee_id %}" class="dropdown-item">Taxrirlash <i
+                                                class="bx bx-edit bx-md"></i></a>
+                                        <div class="dropdown-divider"></div>
+                                        <button type="button" class="dropdown-item text-danger delete-record"
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal" data-employee-id="id">
+                                            O'chirish <i class="bx bx-trash bx-md"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <div class="dataTables_info" id="DataTables_Table_0_info" role="status" aria-live="polite">
+                            {{ page_obj.paginator.count }} ta elementdan {{ page_obj.start_index }} dan
+                            {{ page_obj.end_index }} gacha
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <div class="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                <li class="paginate_button page-item previous">
+                                    <a href="?page=1" aria-controls="DataTables_Table_0" class="page-link"><i
+                                            class="bx bx-chevrons-left bx-18px"></i></a>
+                                </li>
+                                <li class="paginate_button page-item previous">
+                                    <a href="?page={{ page_obj.previous_page_number }}"
+                                        aria-controls="DataTables_Table_0" class="page-link"><i
+                                            class="bx bx-chevron-left bx-18px"></i></a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button page-item previous disabled">
+                                    <a href="#" aria-controls="DataTables_Table_0" class="page-link"><i
+                                            class="bx bx-chevron-left bx-18px"></i></a>
+                                </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="paginate_button page-item active">
+                                    <a href="#" class="page-link">{{ num }}</a>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="paginate_button page-item">
+                                    <a href="?page={{ num }}&page_size={{ page_obj.paginator.per_page }}"
+                                        class="page-link">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                <li class="paginate_button page-item next">
+                                    <a href="?page={{ page_obj.next_page_number }}" aria-controls="DataTables_Table_0"
+                                        class="page-link"><i class="bx bx-chevron-right bx-18px"></i></a>
+                                </li>
+                                <li class="paginate_button page-item next">
+                                    <a href="?page={{ page_obj.paginator.num_pages }}"
+                                        aria-controls="DataTables_Table_0" class="page-link"><i
+                                            class="bx bx-chevrons-right bx-18px"></i></a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button page-item next disabled">
+                                    <a href="#" aria-controls="DataTables_Table_0" class="page-link"><i
+                                            class="bx bx-chevron-right bx-18px"></i></a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="deleteForm" method="post">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">
+                                        <i class="bx bx-exclamation-circle text-warning"></i> Ishonchingiz komilmi?
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Ushbu talabani o'chirishni xohlaysizmi? <br> Ushbu amalni qaytarib bo'lmaydi!
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor
+                                        qilish</button>
+                                    <button type="submit" class="btn btn-danger">Ha, o'chirilsin!</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        deleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const employeeId = button.getAttribute('data-employee-id');
+            deleteForm.action = '{% url "delete_employees" 0 %}'.replace('/0/', '/' + employeeId + '/');
+        });
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // 1. Update page size when user selects a new value
+        $('#pageSize').on('change', function() {
+            var selectedPageSize = $(this).val();
+            window.location.href = "?page_size=" +
+            selectedPageSize; // Redirect to same page with selected page_size
+        });
+    });
+</script>
+
+{% endblock content %}

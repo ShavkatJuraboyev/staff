@@ -1,0 +1,201 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+{% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- DataTable with Buttons -->
+    <div class="card">
+        <div class="card-datatable table-responsive">
+            <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                <div class="container mt-5">
+                    <div class="head-label">
+                        <h4 class="card-title mb-0">Xodimni tahrirlash</h4>
+                    </div>
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">Ism:</label>
+                            <input type="text" id="first_name" name="first_name" class="form-control" value="{{ employee.first_name }}" required placeholder="Ism...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Familiya:</label>
+                            <input type="text" id="last_name" name="last_name" class="form-control" value="{{ employee.last_name }}" required placeholder="Familiya...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="surname" class="form-label">Otasining ismi:</label>
+                            <input type="text" id="surname" name="surname" class="form-control" value="{{ employee.surname }}" required placeholder="Otasining ismi...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="birthday" class="form-label">Tug'ilgan yil:</label>
+                            <input type="date" id="birthday" name="birthday" class="form-control" value="{{ employee.birthday|date:'Y-m-d' }}" required placeholder="Tug'ilgan yil...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_id" class="form-label">Xodim ID:</label>
+                            <input type="text" id="employee_id" name="employee_id" class="form-control" value="{{ employee.employee_id }}" required placeholder="T-1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="arrived_year" class="form-label">Ishga kirgan yil:</label>
+                            <input type="text" id="arrived_year" name="arrived_year" class="form-control" value="{{ employee.arrived_year }}" placeholder="2024-yil">
+                        </div>
+                        <div class="mb-3">
+                            <label for="gone_year" class="form-label">Ishdan ketgan ismi:</label>
+                            <input type="text" id="gone_year" name="gone_year" class="form-control" value="{{ employee.gone_year }}" required placeholder="2024-yil">
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Hujjat Turgan joy <a href="{% url 'add_location' %}" class="btn text-primary ms-2">
+                                <i class='bx bx-plus-medical'></i> </a></label>
+                            <select name="location" class="form-select">
+                                <option>-----------</option>
+                                {% for location in locations %}
+                                <option value="{{ location.id }}" {% if employee.location.id == location.id %}selected{% endif %}>
+                                    {{ location }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <h3>Hujjatlar</h3>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Dokument turi</th>
+                                    <th>Bor yoki yo'q</th>
+                                    <th>O'chirish</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentTableBody">
+                                {% for document in employee.documents.all %}
+                                <tr id="document_{{ document.id }}">
+                                    <td>
+                                        <select name="doc_type[]" class="form-select">
+                                            {% for value, label in document.DOCUMENT_TYPES %}
+                                            <option value="{{ value }}" {% if document.doc_type == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" id="checkbox_{{ document.id }}" name="is_available[]" class="form-check-input" value="1" {% if document.is_available %}checked{% endif %} onclick="toggleAvailability({{ document.id }})">
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeDocument({{ document.id }})"><i class="bx bx-trash bx-md"></i> O'chirish</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table><br>
+                        
+                        <button type="button" class="btn btn-primary" onclick="addDocumentRow()"><i class='bx bx-plus-medical'></i> Yangi hujjat qo'shish</button>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bx bx-trash bx-md"></i>  O'chirish 
+                        </button>
+                        <a href="{% url 'view_employee' employee.id %}" class="btn btn-info"><i class="bx bx-show bx-md"></i> Ko'rish</a>
+                        <button type="submit" class="btn btn-success"><i class='bx bxs-save' ></i> Saqlash</button>
+                        
+                    </form>
+                </div>
+                <!-- Modal for Adding Locations -->
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{% url 'delete_employee' employee.id %}" method="post">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">
+                                        <i class="bx bx-exclamation-circle text-warning"></i> Ishonchingiz komilmi?
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Ushbu talabani o'chirishni xohlaysizmi? <br>
+                                    Ushbu amalni qaytarib bo'lmaydi!
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                                    <button type="submit" class="btn btn-danger">Ha, o'chirilsin!</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Yangi dokument satrini qo'shish
+    function addDocumentRow() {
+        const tableBody = document.getElementById("documentTableBody");
+        const newRow = document.createElement("tr");
+
+        newRow.innerHTML = `
+            <td>
+                <select name="new_doc_type[]" class="form-select">
+                    <option value="" selected>-----------</option>
+                    {% for value, label in employee.documents.model.DOCUMENT_TYPES %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="checkbox" name="new_is_available[]" class="form-check-input" value="1">
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeDocumentRow(this)"><i class="bx bx-trash bx-md"></i> O'chirish</button>
+            </td>
+        `;
+
+        tableBody.appendChild(newRow);
+    }
+
+    // Yangi hujjat qatorini o'chirish
+    function removeDocumentRow(button) {
+        const row = button.closest("tr");
+        row.remove();
+    }
+</script>
+<script>
+    function toggleAvailability(documentId) {
+        // Get the checkbox element for the document
+        var checkbox = document.querySelector('#checkbox_' + documentId);
+        var isAvailable = checkbox.checked;
+    
+        // Send AJAX request to update the document's availability
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;  // CSRF token for security
+        var url = '{% url "update_document_employee_availability" %}';  // URL to handle the AJAX request
+    
+        var data = {
+            'document_id': documentId,
+            'is_available': isAvailable
+        };
+
+        // AJAX so'rovini yuborish, CSRF tokeni headerda qo'shilgan holda
+        fetch('/update/document/employee/availability/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken  // CSRF tokeni shu yerda qo'shiladi
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Javobni qayta ishlash
+            console.log(data);
+        }) 
+        .catch(error => {
+            console.error('Xato:', error);
+        });
+    }
+    </script>
+    
+{% endblock %}

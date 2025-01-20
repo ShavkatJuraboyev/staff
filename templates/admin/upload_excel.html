@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive">
+                <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                    <div class="container mt-5">
+                        <div class="head-label">
+                            <h4 class="card-title mb-0">Excel faylini yuklang</h4>
+                        </div>
+                        <form action="{% url 'add_employees' %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="excel_file" class="form-label">Excel faylini yuklang:</label>
+                                <input type="file" id="excel_file" name="excel_file" class="form-control" value="{{ employee.first_name }}" required >
+                            </div>
+    
+                            <button type="submit" class="btn btn-success"><i class='bx bxs-download' ></i> Yuklash</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    {% endblock content %}
