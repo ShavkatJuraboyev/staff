@@ -36,18 +36,16 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div><br>
                 <div class="row">
-                    <div class="col-sm-12 col-md-6">
-                        <div class="dataTables_length" id="DataTables_Table_0_length">
+                    <div class="col-md-2">
+                        <div>
                             <form id="pageSizeForm" method="get">
                                 {% csrf_token %}
                                 <label>
                                     Sahifadagi elementlar soni:
                                     <select name="page_size" aria-controls="DataTables_Table_0" class="form-select"
                                         id="pageSize">
-                                        <option value="7" {% if request.GET.page_size == "7" %}selected{% endif %}>7
-                                        </option>
                                         <option value="10" {% if request.GET.page_size == "10" %}selected{% endif %}>10
                                         </option>
                                         <option value="25" {% if request.GET.page_size == "25" %}selected{% endif %}>25
@@ -63,19 +61,50 @@
                             </form>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end mt-n6 mt-md-0">
-                        <form method="get" action="#">
-                            <div id="DataTables_Table_0_filter" class="dataTables_filter">
-                                <label>Qidirish:
-                                    <input type="search" name="q" class="form-control" placeholder="qidirish..."
-                                        aria-controls="DataTables_Table_0">
-                                </label>
-                            </div>
-                        </form>
-                    </div>
+                    <form method="get" id="filter-form" class="d-flex flex-wrap gap-2">
+                        <div>
+                            <label>Katta yosh:
+                                <input type="number" name="katta" class="form-control" placeholder="Katta yosh..." value="{{ request.GET.katta }}">
+                            </label>
+                        </div>
+                        <div>
+                            <label>Kichik yosh:
+                                <input type="number" name="kichik" class="form-control" placeholder="Kichik yosh..." value="{{ request.GET.kichik }}">
+                            </label>
+                        </div>
+                        <div>
+                            <label>Jinsi:
+                                <select name="gender" class="form-select">
+                                    <option value="">Hammasi</option>
+                                    <option value="Erkak" {% if request.GET.gender == 'Erkak' %}selected{% endif %}>Erkak</option>
+                                    <option value="Ayol" {% if request.GET.gender == 'Ayol' %}selected{% endif %}>Ayol</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div>
+                            <label>Ilmiy daraja:
+                                <select name="ilmiy_daraja" class="form-select">
+                                    <option value="">Hammasi</option>
+                                    {% for academic_deg in academic_degree %}
+                                    <option value="{{ academic_deg }}" {% if request.GET.ilmiy_daraja == academic_deg %}selected{% endif %}>{{ academic_deg }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                        <div>
+                            <label>Ilmiy unvon:
+                                <select name="ilmiy_unvon" class="form-select">
+                                    <option value="">Hammasi</option>
+                                    {% for academic_tit in academic_title %}
+                                    <option value="{{ academic_tit }}" {% if request.GET.ilmiy_unvon == academic_tit %}selected{% endif %}>{{ academic_tit }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                    </form>
                 </div>
-                <table class="dt-complex-header table table-bordered dataTable no-footer" id="DataTables_Table_1"
-                    aria-describedby="DataTables_Table_1_info" style="width: 1392px;">
+                <br>
+                <table class="dt-complex-header table table-bordered dataTable no-footer" id="employeeTable" border="1" style="width: 1392px;">
                     <thead>
                         <tr>
                             <th style="width: 20px;">T/R</th>
@@ -83,8 +112,9 @@
                             <th>Xodimlar F.I.O</th>
                             <th>Telefoni</th>
                             <th>Tug'ulgan yili</th>
-                            <th>Yoshi</th>
-                            <th>Stavkasi</th>
+                            <th id="ageColumn" style="cursor: pointer;">Yoshi</th>
+                            <th>Ilmiy daraja</th>
+                            <th>Ilmiy unvon</th>
                             <th>Mexnat shakli</th>
                             <th>Jinsi</th>
                             <th class="sorting_disabled" style="width: 88px;">Harakat</th>
@@ -100,7 +130,7 @@
                                 {{ employee_data.employee_id }} 
                             </td>
                             <td>
-                                <a href="#">
+                                <a href="{% url 'view_employees' employee_data.employee_id %}">
                                     <div class="d-flex justify-content-start align-items-center user-name">
                                         <div class="d-flex flex-column"><span
                                                 class="emp_name text-truncate">{{ employee_data.last_name }} {{ employee_data.frist_name }}</span><small
@@ -118,7 +148,10 @@
                                 {{employee_data.age}}
                             </td>
                             <td>
-                                {{employee_data.stavka}}
+                                {{employee_data.academic_degree}}
+                            </td>
+                            <td>
+                                {{employee_data.academic_title}}
                             </td>
                             <td>
                                 {{employee_data.labor_form}}
@@ -137,7 +170,7 @@
                                                 class="bx bx-edit bx-md"></i></a>
                                         <div class="dropdown-divider"></div>
                                         <button type="button" class="dropdown-item text-danger delete-record"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal" data-employee-id="id">
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal" data-employee-id="{{employee_data.employee_id}}">
                                             O'chirish <i class="bx bx-trash bx-md"></i>
                                         </button>
                                     </div>
@@ -147,6 +180,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
                 <div class="row">
                     <div class="col-sm-12 col-md-6">
                         <div class="dataTables_info" id="DataTables_Table_0_info" role="status" aria-live="polite">
@@ -154,9 +188,17 @@
                             {{ page_obj.end_index }} gacha
                         </div>
                     </div>
+                    
                     <div class="col-sm-12 col-md-6">
                         <div class="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate">
+                            
                             <ul class="pagination">
+                                <button type="button" id="export-excel" class="btn btn-success">
+                                    <i class='bx bxs-download'></i>&nbsp; Filterni saqlash 
+                                </button> &nbsp;&nbsp;
+                                <button type="button" class="btn btn-success" onclick="window.location.href='{% url 'export_employees' %}'">
+                                    <i class='bx bxs-download'></i>&nbsp; Barchasini saqlash
+                                </button>
                                 {% if page_obj.has_previous %}
                                 <li class="paginate_button page-item previous">
                                     <a href="?page=1" aria-controls="DataTables_Table_0" class="page-link"><i
@@ -240,6 +282,49 @@
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const table = document.getElementById("employeeTable");
+    const tbody = table.querySelector("tbody");
+    const headers = table.querySelectorAll("thead th");
+    let sortStates = Array.from(headers, () => 0); // Har bir ustun uchun boshlang'ich holat
+
+    headers.forEach((header, index) => {
+        if (!header.classList.contains("sorting_disabled")) { // Faqat tartiblashga ruxsat berilgan ustunlar uchun
+            header.style.cursor = "pointer"; // Ko'rsatkichni o'zgartirish
+            header.addEventListener("click", function () {
+                const rows = Array.from(tbody.querySelectorAll("tr"));
+                sortStates[index] = (sortStates[index] + 1) % 3;
+
+                if (sortStates[index] === 0) {
+                    // Boshlang'ich holatga qaytarish
+                    rows.sort((a, b) => a.rowIndex - b.rowIndex);
+                } else {
+                    rows.sort((a, b) => {
+                        const cellA = a.cells[index].textContent.trim();
+                        const cellB = b.cells[index].textContent.trim();
+
+                        // Agar raqam bo'lsa, raqam sifatida tartibla; aks holda, matn sifatida
+                        const valA = isNaN(cellA) ? cellA : parseFloat(cellA);
+                        const valB = isNaN(cellB) ? cellB : parseFloat(cellB);
+
+                        if (sortStates[index] === 1) {
+                            // O'sish tartibida
+                            return valA > valB ? 1 : valA < valB ? -1 : 0;
+                        } else if (sortStates[index] === 2) {
+                            // Kamayish tartibida
+                            return valA < valB ? 1 : valA > valB ? -1 : 0;
+                        }
+                    });
+                }
+
+                // Jadvalni yangilash
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        }
+    });
+});
+
+
     document.addEventListener('DOMContentLoaded', function() {
         const deleteModal = document.getElementById('deleteModal');
         const deleteForm = document.getElementById('deleteForm');
@@ -252,14 +337,55 @@
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // 1. Update page size when user selects a new value
+    $(document).ready(function() { 
+        
         $('#pageSize').on('change', function() {
             var selectedPageSize = $(this).val();
             window.location.href = "?page_size=" +
-            selectedPageSize; // Redirect to same page with selected page_size
+            selectedPageSize; 
         });
     });
 </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Har bir input yoki select elementni o'zgartirishda so'rov yuborish
+    $('#filter-form input, #filter-form select').on('change', function() {
+        var data = $('#filter-form').serialize();  // Formadagi barcha malumotlarni olish
+        
+        $.ajax({
+            url: "{% url 'all_employees' %}",  // Django URL endpointi
+            data: data,  // Formadagi malumotlar
+            method: "GET",
+            success: function(response) {
+                // Serverdan kelgan javobni ko'rsatish
+                $('#employees-list').html(response);  // Bu yerda filterlangan ro'yxatni ko'rsating
+            },
+            error: function(xhr, errmsg, err) {
+                alert("Xatolik yuz berdi: " + errmsg);
+            }
+        });
+    });
+
+    // Excelga saqlash uchun
+    $('#export-excel').on('click', function() {
+        var data = $('#filter-form').serialize();  // Formadagi barcha malumotlarni olish
+        
+        $.ajax({
+            url: "{% url 'export_excel' %}",  // Excel eksport qilish uchun endpoint
+            data: data,
+            method: "GET",
+            success: function(response) {
+                // Foydalanuvchiga Excel faylini yuborish
+                window.location.href = response.file_url;
+            },
+            error: function(xhr, errmsg, err) {
+                alert("Xatolik yuz berdi: " + errmsg);
+            }
+        });
+    });
+});
+</script>
+
 
 {% endblock content %}

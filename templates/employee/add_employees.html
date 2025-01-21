@@ -19,7 +19,7 @@
                     <div class="head-label">
                         <h4 class="card-title mb-0">Xodim qo'shish</h4>
                     </div>
-                    <form action="{% url 'add_employees' %}" method="post">
+                    <form action="" method="post">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-4">
@@ -209,14 +209,40 @@
                                 </div>
                             </div>
                         </div>
+                        {% if employee %}
+                        <a href="{% url 'all_employees'%}" class="btn btn-primary"><i class='bx bx-left-arrow-alt'></i> Ortga</a>
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                             <i class="bx bx-trash bx-md"></i>  O'chirish 
                         </button>
                         <a href="{% url 'view_employees' employee.employee_id %}" class="btn btn-info"><i class="bx bx-show bx-md"></i> Ko'rish</a>
+                        {% endif %}
                         <button type="submit" class="btn btn-success"><i class='bx bxs-save' ></i> Saqlash</button>
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="bx bx-exclamation-circle text-warning"></i> Ishonchingiz komilmi?
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Ushbu Xodimni o'chirishni xohlaysizmi? <br>
+                    Ushbu amalni keyin qaytarib bo'lmaydi!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-danger">Ha, o'chirilsin!</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -1,32 +1,50 @@
 {% extends 'base/base.html' %}
 {% block content %}
+
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="card-title mb-4">{{ employee.first_name }} {{ employee.last_name }} {{ employee.surname }} ma'lumotlari</h4>
+    <h4 class="card-title mb-4">{{ user_info.full_name }} ma'lumotlari</h4>
     <div class="card">
         <div class="card-body">
-            <p><strong>Tugilgan yili:</strong> {{ employee.birthday }}</p>
-            <p><strong>Xodim ID:</strong> {{ employee.employee_id }}</p>
-            <p><strong>Ishga kirgan yil:</strong> {{ employee.arrived_year }}</p>
-            <p><strong>Ishdan ketgan yil:</strong> {{ employee.gone_year }}</p>
-            <p><strong>Hona:</strong> {{ employee.location.room }} - Xona</p>
-            <p><strong>Shkaf:</strong> {{ employee.location.shelf }} - Shkaf</p>
-            <h6>Hujjatlar:</h6>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Hujjat turi</th>
-                        <th>Bor/yok</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for document in employee.documents.all %}
-                    <tr>
-                        <td>{{ document.get_doc_type_display }}</td>
-                        <td>{{ document.is_available|yesno:"Bor,Yo'q" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table><hr>
+            <div class="row">
+                <div class="col-2" style="width: 15rem;">
+                    <img src="{{ user_info.image }}" class="card-img-top" alt="{{user_info.full_name}}">
+                </div>
+                <div class="col-3">
+                    <p><strong>Xodim ID:</strong> {{ employee.employee_id }}</p>
+                    <p><strong>Tug'ilgan sana:</strong> {{ employee.bithday }}</p>
+                    <p><strong>Pasport raqami:</strong> {{ employee.passport }}</p>
+                    <p><strong>JSHSHIR-kod:</strong> {{ employee.personal_number }}</p>
+                    <p><strong>Yoshi:</strong> {{ employee.age }}</p>
+                    <p><strong>Fakultet:</strong> {{ employee.faculty }}</p>
+                    <p><strong>Kafedra/Bo'lim:</strong> {{ employee.department }}</p>
+                    <p><strong>Mehnat shakli:</strong> {{ employee.labor_form}}</p>
+                    <p><strong>Stavka:</strong> {{ employee.stavka }} </p>
+                </div>
+                <div class="col-3">
+                    <p><strong>Lavozim:</strong> {{ employee.position }}</p>
+                    <p><strong>Telefon raqam:</strong> {{ employee.phone }}</p>
+                    <p><strong>Ilmiy darajasi:</strong> {{employee.academic_degree}}</p>
+                    <p><strong>Ilmiy unvon:</strong> {{ employee.academic_title }}</p>
+                    <p><strong>Mutaxassisligi:</strong> {{ employee.expertise }}</p>
+                    <p><strong>Ishga kirgan sana:</strong> {{ employee.start_position }}</p>
+                    <p><strong>Shartnoma raqami:</strong> {{ employee.contract_number}}</p>
+                    <p><strong>Shartnoma sanasi:</strong> {{ employee.contract_date }}</p>
+                    <p><strong>Buyruq raqami:</strong> {{ employee.order_number }}</p>
+                    <p><strong>Buyruq sanasi:</strong> {{ employee.order_date }}</p>
+                </div>
+                <div class="col-3">
+                    <p><strong>Jinsi:</strong> {{employee.gender}}</p>
+                    <p><strong>Email:</strong> {{ employee.email }}</p>
+                    <p><strong>Doimiy yashash joyi:</strong> {{ employee.permanent_registration }}</p>
+                    <p><strong>Tashkiloti nomi:</strong> {{ employee.organization }}</p>
+                    <p><strong>Millati:</strong> {{ employee.nationality }}</p>
+                    <p><strong>Tug'ilgan joyi:</strong> {{ employee.place_of_birth }}</p>
+                    <p><strong>Tuman yoki Shaxar:</strong> {{ employee.city }}</p>
+                    <p><strong>Oliy ta'lim muassasasini tugatgan yili:</strong> {{ employee.graduation_end_year }}</p>
+                    <p><strong>Tugatgan oliy ta'limi nomi:</strong> {{ employee.end_education }}</p>
+                </div>
+            </div><br><hr>
+            <a href="{% url 'all_employees'%}" class="btn btn-primary"><i class='bx bx-left-arrow-alt'></i> Ortga</a>
             <a href="{% url 'edit_employees' employee.employee_id %}" class="btn btn-primary"><i class='bx bx-edit-alt'></i> Tahrirlash</a>
             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                 <i class="bx bx-trash bx-md"></i> O'chirish
@@ -34,6 +52,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -46,7 +65,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Ushbu talabani o'chirishni xohlaysizmi? <br>
+                    Ushbu Xodimni o'chirishni xohlaysizmi? <br>
                     Ushbu amalni keyin qaytarib bo'lmaydi!
                 </div>
                 <div class="modal-footer">
