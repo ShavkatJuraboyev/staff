@@ -1,72 +1,87 @@
-import openpyxl, csv # Excel fayllarini o'qish uchun
+import openpyxl, requests, json # Excel fayllarini o'qish uchun kutubxona
 from django.shortcuts import render, redirect # render va redirect kutubxonasini import qilamiz
-from .models import Employee # Talabalar modelini import qilamiz
+from employee.models import Employee, Role, UserRole # Talabalar modelini import qilamiz
 from django.contrib import messages # Xabarlar uchun
 from django.db.models import Q # Q kutubxonasini import qilamiz
 from django.core.paginator import Paginator # Paginator kutubxonasini import qilamiz
-from django.http import HttpResponseNotFound, HttpResponse # 404 xatolikni chiqarish uchun
-import requests # requests kutubxonasini import qilamiz
-from django.http import HttpResponse
+from django.http import HttpResponseNotFound, HttpResponse, JsonResponse # 404 xatolikni chiqarish uchun
+from django.db import IntegrityError
+from django.contrib.auth.models import User
+from employee.decorators import role_required # Ruxsatlarni tekshirish uchun
+from django.contrib.auth.decorators import login_required # Login bo'lishni tekshirish uchun
+from django.contrib.auth import login, logout, authenticate # Login, logout va authenticate uchun
+from employee.forms import LoginForm # Login formasi
 
-def export_excel(request):
-    # Filtrlarni olish
-    katta_yosh = request.GET.get('katta', None)  # Katta yosh filtri
-    kichik_yosh = request.GET.get('kichik', None)  # Kichik yosh filtri
-    gender = request.GET.get('gender', None)  # Jinsi
-    ilmiy_daraja = request.GET.get('ilmiy_daraja', None)  # Ilmiy daraja
-    ilmiy_unvon = request.GET.get('ilmiy_unvon', None)  # Ilmiy unvon
-    
+def login_decorator(func):
+    return login_required(func, login_url='user_login')
+
+def user_login(request):
+    if request.POST:
+        forms = LoginForm(request.POST)
+        if forms.is_valid():
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, password=password, username=username)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'{request.user.username} tizimga kirdiz!')
+                return redirect('all_employees')
+            else:
+                messages.warning(request, 'Bunday foydalanuvchi mavjud emas!')
+                return redirect('user_login')
+        else:
+            messages.warning(request, 'Username yoki parol xato!')
+            return redirect('user_login')
+    else:
+        forms = LoginForm()
+    return render(request, 'admin/login.html')
+
+@login_decorator
+def logOut(request):
+    logout(request)
+    return redirect("user_login")
+ 
+
+@login_decorator
+@role_required("download_user")
+def get_filtered_employees(request):
+    q = request.GET.get('q', '')
+    katta = request.GET.get('katta', None)
+    kichik = request.GET.get('kichik', None)
+    gender = request.GET.get('gender', '')
+    ilmiy_daraja = request.GET.get('ilmiy_daraja', '')
+    ilmiy_unvon = request.GET.get('ilmiy_unvon', '')
+    kafedra = request.GET.get('kafedra', '')  # kafedra
+    tugilgan_joyi = request.GET.get('placeofbirtht', '')
+
     employees = Employee.objects.all()
 
-    if katta_yosh:
-        employees = employees.filter(age__gte=katta_yosh)
-
-    if kichik_yosh:
-        employees = employees.filter(age__lte=kichik_yosh)
-
+    if q:
+        employees = employees.filter(frist_name__icontains=q)
+    if katta:
+        employees = employees.filter(age__gte=katta)
+    if kichik:
+        employees = employees.filter(age__lte=kichik)
     if gender:
         employees = employees.filter(gender=gender)
-
     if ilmiy_daraja:
         employees = employees.filter(academic_degree=ilmiy_daraja)
-
     if ilmiy_unvon:
         employees = employees.filter(academic_title=ilmiy_unvon)
+    if kafedra:
+        employees = employees.filter(department=kafedra)  # Kafedra bo'yicha filtr
+    if tugilgan_joyi:
+        employees = employees.filter(place_of_birth=tugilgan_joyi)  # Tug'ilgan joyi filtr
 
-    # Excel faylni yaratish
-    workbook = openpyxl.Workbook()
-    sheet = workbook.active
-    sheet.title = "Employees"
-
-    # Sarlavha qatorini qo'shamiz
-    headers = [
-        "Xodim ID", "Fuqaroligi", "Passport seriyasi", "Shaxsiy raqam (JSHER)", "Fakulteti",
-        "Kafedra/Bo'lim", "Ismi", "Familiyasi", "Otasining ismi", "Ish shakli", "Stavka",
-        "Lavozimi", "Ilmiy darajasi", "Ilmiy unvon", "Mutaxassisligi", "Ishga kirgan sana",
-        "Shartnoma raqami", "Shartnoma sanasi", "Buyruq raqami", "Buyruq sanasi", 
-        "Tug'ilgan kun", "Yoshi", "Jinsi", "Email", "Telefon raqami", "Doimiy yashash joyi",
-        "Tashkiloti nomi", "Millati", "Tug'ilgan joyi", "Tuman yoki Shaxar",
-        "Tugatgan yili", "Tugatgan oliy ta'lim nomi"
-    ]
-    sheet.append(headers)
-
-    for employee in enumerate(employees, start=1):
-        sheet.append([
-            employee.employee_id, employee.citizenship, employee.passport, employee.personal_number,
-            employee.faculty, employee.department, employee.frist_name, employee.last_name,
-            employee.sur_name, employee.labor_form, employee.stavka, employee.position,
-            employee.academic_degree, employee.academic_title, employee.expertise, employee.start_position,
-            employee.contract_number, employee.contract_date, employee.order_number, employee.order_date,
-            employee.bithday, employee.age, employee.gender, employee.email, employee.phone,
-            employee.permanent_registration, employee.organization, employee.nationality,
-            employee.place_of_birth, employee.city, employee.graduation_end_year, employee.end_education
-        ])
-
-    # Javob qaytarish
-    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response['Content-Disposition'] = 'attachment; filename=employees.xlsx'
-    workbook.save(response)
-    return response
+    data = list(employees.values(
+        'employee_id', 'citizenship', 'passport', 'personal_number', 'faculty', 'department', 
+        'frist_name', 'last_name', 'sur_name', 'labor_form', 'stavka', 'position', 
+        'academic_degree', 'academic_title', 'expertise', 'start_position', 
+        'contract_number', 'contract_date', 'order_number', 'order_date', 'bithday', 
+        'age', 'gender', 'email', 'phone', 'permanent_registration', 'organization', 
+        'nationality', 'place_of_birth', 'city', 'graduation_end_year', 'end_education'
+    ))
+    return JsonResponse({'employees': data})
 
 
 def get_employment_info(hemis_id): # Hemis ID bo'yicha ish joyi ma'lumotlarini olish
@@ -79,7 +94,8 @@ def get_employment_info(hemis_id): # Hemis ID bo'yicha ish joyi ma'lumotlarini o
         return response.json() # JSON ma'lumotlarni qaytarish
     return None # Aks holda None qaytarish
 
-
+@login_decorator
+@role_required("download_user")
 def export_employees_to_excel(request):
     # Excel faylni yaratamiz
     workbook = openpyxl.Workbook()
@@ -118,10 +134,11 @@ def export_employees_to_excel(request):
     workbook.save(response)
     return response
 
-
-def upload_excel(request): # Excel faylni yuklash
-    if request.method == "POST" and request.FILES.get('excel_file'): # POST so'rovni tekshirish
-        excel_file = request.FILES['excel_file'] # Excel faylini olish
+@login_decorator
+@role_required("add_user")
+def upload_excel(request):  # Excel faylni yuklash
+    if request.method == "POST" and request.FILES.get('excel_file'):  # POST so'rovni tekshirish
+        excel_file = request.FILES['excel_file']  # Excel faylini olish
 
         # Faylni ochish
         try:
@@ -130,42 +147,51 @@ def upload_excel(request): # Excel faylni yuklash
 
             # Excel faylidagi qatorlarga o'qish
             for row in sheet.iter_rows(min_row=2, values_only=True):  # 1-qatordan keyingi qatorlar
-                Employee.objects.create(
-                    employee_id=row[0], # Xodim ID
-                    citizenship=row[1], # Fuqarolik
-                    passport=row[2], # Passport
-                    personal_number=row[3], # Shaxsiy raqam
-                    faculty=row[4], # Fakultet
-                    department=row[5], # Kafedra
-                    frist_name=row[6], # Ismi
-                    last_name=row[7], # Familiyasi
-                    sur_name=row[8],
-                    labor_form=row[9],
-                    stavka=row[10],
-                    position=row[11],
-                    academic_degree=row[12],
-                    academic_title=row[13],
-                    expertise=row[14],
-                    start_position=row[15],
-                    contract_number=row[16],
-                    contract_date=row[17],
-                    order_number=row[18],
-                    order_date=row[19],
-                    bithday=row[20],
-                    gender=row[22],  # Corrected index for gender
-                    email=row[23],   # Corrected index for email
-                    phone=row[24],   # Corrected index for phone
-                    permanent_registration=row[25],  # Corrected index for permanent_registration
+                employee_id = row[0]  # Xodim ID
+
+                # Mavjud xodimni tekshirish va yangilash yoki yangi xodim yaratish
+                employee, created = Employee.objects.update_or_create(
+                    employee_id=employee_id,  # employee_id bo'yicha izlash
+                    defaults={
+                        'citizenship': row[1],
+                        'passport': row[2],
+                        'personal_number': row[3],
+                        'faculty': row[4],
+                        'department': row[5],
+                        'frist_name': row[6],
+                        'last_name': row[7],
+                        'sur_name': row[8],
+                        'labor_form': row[9],
+                        'stavka': row[10],
+                        'position': row[11],
+                        'academic_degree': row[12],
+                        'academic_title': row[13],
+                        'expertise': row[14],
+                        'start_position': row[15],
+                        'contract_number': row[16],
+                        'contract_date': row[17],
+                        'order_number': row[18],
+                        'order_date': row[19],
+                        'bithday': row[20],
+                        'gender': row[22],
+                        'email': row[23],
+                        'phone': row[24],
+                        'permanent_registration': row[25],
+                    }
                 )
-            messages.success(request, "Ma'lumotlar muvaffaqiyatli saqlandi!") # Xabar chiqarish
-        except Exception as e: # Xatolikni tekshirish
-            messages.error(request, f"Xato yuz berdi: {str(e)}") # Xabar chiqarish
+                # Employee.objects.create() bilan bir xil, faqat yangilash yoki yaratish amalga oshadi
+            messages.success(request, "Ma'lumotlar muvaffaqiyatli saqlandi!")  # Xabar chiqarish
+        except IntegrityError as e:  # Unikal constraint xatoliklarini tekshirish
+            messages.error(request, f"Xato yuz berdi: {str(e)}")  # Xabar chiqarish
+        except Exception as e:  # Boshqa xatoliklarni tekshirish
+            messages.error(request, f"Xatolik: {str(e)}")  # Xabar chiqarish
         
         return redirect('upload_excel')  # Foydalanuvchini qaytarish
 
-    return render(request, 'admin/upload_excel.html') # Agar POST bo'lmasa, faylni yuklash sahifasini chiqarish
+    return render(request, 'admin/upload_excel.html')  # Agar POST bo'lmasa, faylni yuklash sahifasini chiqarish
 
-
+@login_decorator
+@role_required("view_reports")
 def all_employees(request):
     employees = Employee.objects.all().order_by('-id')  # Barcha xodimlarni olish
     query = request.GET.get('q', '')  # Qidiruv uchun so'rov
@@ -174,9 +200,16 @@ def all_employees(request):
     gender = request.GET.get('gender', None)  # Jinsi
     ilmiy_daraja = request.GET.get('ilmiy_daraja', None)  # Ilmiy daraja
     ilmiy_unvon = request.GET.get('ilmiy_unvon', None)  # Ilmiy unvon
+    kafedra = request.GET.get('kafedra', None)  # kafedra
+    tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
+    permanent = request.GET.get('permanent', None)  # Doimiy yashash joyi
+
     academic_degree = Employee.objects.filter(academic_degree__isnull=False).values_list('academic_degree', flat=True).distinct() # Ilmiy darajalar
     academic_title = Employee.objects.filter(academic_title__isnull=False).values_list('academic_title', flat=True).distinct() # Ilmiy unvonlar
-
+    department = Employee.objects.filter(department__isnull=False).values_list('department', flat=True).distinct() # Kafedralar
+    place_of_birth = Employee.objects.filter(place_of_birth__isnull=False).values_list('place_of_birth', flat=True).distinct() # Kafedralar
+    city = Employee.objects.filter(city__isnull=False).values_list('city', flat=True).distinct() # Doimiy yashash joyi
+    
     # Filtrlash
     if query:
         employees = employees.filter(
@@ -185,7 +218,7 @@ def all_employees(request):
             Q(sur_name__icontains=query) |
             Q(employee_id__icontains=query) |
             Q(phone__icontains=query) |
-            Q(age__icontains=query)
+            Q(age__icontains=query) 
         )
     if katta_yosh:
         employees = employees.filter(age__gte=int(katta_yosh))  # Yoshdan katta
@@ -197,6 +230,12 @@ def all_employees(request):
         employees = employees.filter(academic_degree=ilmiy_daraja)  # Ilmiy daraja bo'yicha filtr
     if ilmiy_unvon:
         employees = employees.filter(academic_title=ilmiy_unvon)  # Ilmiy unvon bo'yicha filtr
+    if kafedra:
+        employees = employees.filter(department=kafedra)  # Kafedra bo'yicha filtr
+    if tugilgan_joyi:
+        employees = employees.filter(place_of_birth=tugilgan_joyi)  # Tug'ilgan joyi filtr
+    if permanent:
+        employees = employees.filter(city=permanent) # Doimiy yashash joyi filtr
 
 
     # Pagination
@@ -205,30 +244,20 @@ def all_employees(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Check if the request is an AJAX request using the proper header
-    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        # If it's an AJAX request, return filtered employee data (optional: add pagination if needed)
-        context = {
-                'page_obj': page_obj,
-                'employees': employees,
-                'segment': 'employee',
-                "academic_degree": academic_degree,
-                "academic_title": academic_title
-            }
-        return render(request, 'employee/all_employees.html', context)
-    
-
     context = {
         'page_obj': page_obj,
         'employees': employees,
         'segment': 'employee',
         "academic_degree": academic_degree,
-        "academic_title": academic_title
+        "academic_title": academic_title,
+        "department": department,  # Kafedralar
+        "place_of_birth": place_of_birth,  # Tug'ilgan joylar
+        "permanent_registration": city,  # Doimiy yashash joylar
     }
     return render(request, 'employee/all_employees.html', context=context)
 
-
-
+@login_decorator
+@role_required("view_reports")
 def view_employees(request, employee_id): # Xodim ma'lumotlarini ko'rish
     try: # Xodimni topish
         employee = Employee.objects.filter(employee_id=employee_id).first() # Xodimni olish
@@ -245,7 +274,8 @@ def view_employees(request, employee_id): # Xodim ma'lumotlarini ko'rish
 
     return render(request, "employee/view_employees.html", context=context) # Xodim ma'lumotlarini chiqarish
 
-
+@login_decorator
+@role_required("add_user")
 def add_employees(request): # Xodim qo'shish
     if request.method == "POST": # POST so'rovni tekshirish
         employee_id = request.POST.get("employee_id")
@@ -297,7 +327,8 @@ def add_employees(request): # Xodim qo'shish
     context = {'segment':'employee'} 
     return render(request, "employee/add_employees.html", context=context) # Xodim qo'shish sahifasini chiqarish
 
-
+@login_decorator
+@role_required("ubdate_user")
 def edit_employees(request, employee_id): # Xodim ma'lumotlarini tahrirlash
     employee = Employee.objects.filter(employee_id=employee_id).first() # Xodimni olish
 
@@ -345,8 +376,32 @@ def edit_employees(request, employee_id): # Xodim ma'lumotlarini tahrirlash
 
     return render(request, "employee/add_employees.html", context=context) # Xodim ma'lumotlarini tahrirlash sahifasini chiqarish
 
-
+@login_decorator
+@role_required("delete_user")
 def delete_employees(request, employee_id): # Xodimni o'chirish
     employee = Employee.objects.filter(employee_id=employee_id).first() # Xodimni olish
     employee.delete() # Xodimni o'chirish
     return redirect("all_employees") # Talabalar ro'yxatiga yo'naltirish
+
+@login_decorator
+def manage_roles(request):
+    if request.method == 'POST':
+        role_name = request.POST['role_name']
+        permissions = request.POST['permissions']  # JSON formatda
+        Role.objects.create(name=role_name, permissions=permissions)
+        return redirect('manage_roles')
+
+    roles = Role.objects.all()
+    return render(request, 'admin/manage_roles.html', {'roles': roles})
+
+@login_decorator
+def assign_role(request, user_id):
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        role_id = request.POST['role']
+        role = Role.objects.get(id=role_id)
+        UserRole.objects.update_or_create(user=user, defaults={'role': role})
+        return redirect('assign_role', user_id=user.id)
+
+    roles = Role.objects.all()
+    return render(request, 'admin/assign_role.html', {'user': user, 'roles': roles})

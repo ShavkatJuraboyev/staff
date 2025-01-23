@@ -1,0 +1,83 @@
+<!doctype html>
+{% load static %}
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>Arxiv uz</title>
+
+    <meta name="description" />
+    <meta name="keywords">
+
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="{% static 'assets/vendor/fonts/boxicons.css' %}" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/core.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/theme-default.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/demo.css' %}" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="{% static 'assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}">
+
+
+    <!-- Helpers -->
+    <script src="{% static 'assets/vendor/js/helpers.js' %}"></script>
+    
+
+</head>
+
+<body>  
+  <div class="container">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+      <div class="authentication-inner " style="display: flex; justify-content: center; align-items: center; ">
+        <!-- Register -->
+        <div class="card px-sm-6 px-0 col-sm-4">
+          <div class="card-body">
+            <!-- Logo -->
+            <div class="app-brand justify-content-center">
+              <a href="" class="app-brand-link gap-2">
+                <span class="app-brand-logo demo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="4" rx="2" ry="2"></rect>
+                        <path d="M3 7v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"></path>
+                        <line x1="10" y1="12" x2="14" y2="12"></line>
+                      </svg>
+                </span>
+                <span class="app-brand-text demo text-heading fw-bold">Kadrlar</span>
+              </a>
+            </div>
+            {% if messages %}
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+            {% endif %}
+            <form id="formAuthentication" class="mb-6 fv-plugins-bootstrap5 fv-plugins-framework"  method="post">
+                {% csrf_token %}
+              <div class="mb-6 fv-plugins-icon-container">
+                <label  class="form-label">Username</label>
+                <input type="text" class="form-control" name="username" placeholder="Enter your username">
+              <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div></div>
+              <div class="mb-6 form-password-toggle fv-plugins-icon-container">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-group input-group-merge has-validation">
+                  <input type="password" id="password" class="form-control" name="password" placeholder="············">
+                  <span class="input-group-text cursor-pointer"></span>
+                </div><div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div>
+              </div>
+              <div class="mb-6">
+                <button class="btn btn-primary d-grid w-100" type="submit">Login</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  
+    
+  

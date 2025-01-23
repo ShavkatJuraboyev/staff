@@ -1,4 +1,6 @@
 {% extends 'base/base.html' %}
+{% load static %}
+
 {% block content %}
 
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -7,7 +9,11 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-2" style="width: 15rem;">
+                    {% if user_info.image %}
                     <img src="{{ user_info.image }}" class="card-img-top" alt="{{user_info.full_name}}">
+                    {% else %}
+                    <img src="{% static 'assets/img/avatars/2.png' %}" class="card-img-top" alt="{{user_info.full_name}}">
+                    {% endif %}
                 </div>
                 <div class="col-3">
                     <p><strong>Xodim ID:</strong> {{ employee.employee_id }}</p>

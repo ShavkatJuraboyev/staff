@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+{% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- DataTable with Buttons -->
+    <div class="card">
+        <div class="card-datatable table-responsive">
+            <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                <div class="card-header flex-column flex-md-row pb-0">
+                    <div class="head-label text-center">
+                        <h5 class="card-title mb-0">Sizning ruxsatingiz yo'q!</h5>
+                    </div>
+                    <div class="dt-action-buttons text-end pt-6 pt-md-0">
+                        <div class="dt-buttons btn-group flex-wrap">
+                            <a href="{% url 'all_employees' %}" class="btn btn-secondary create-new btn-primary"
+                                style="color: aliceblue;">
+                                <span>
+                                    <i class='bx bx-left-arrow-alt'></i>
+                                    <span class="d-none d-sm-inline-block">Ortga qaytish</span>
+                                </span>
+                            </a> 
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

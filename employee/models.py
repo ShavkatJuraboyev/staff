@@ -1,10 +1,27 @@
 from django.db import models
 from datetime import datetime
+from django.contrib.auth.models import User
 
-# Create your models here.
- 
+class Role(models.Model):
+    name = models.CharField(max_length=50, unique=True, verbose_name="Rol nomi")  # Rol nomi
+    permissions = models.TextField(verbose_name="ruxsatlar")  # JSON yoki boshqa formatda ruxsatlar ro'yxati
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Rol yaratish"
+        verbose_name_plural = "Rollar"
+
+class UserRole(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='role')
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role.name}"
+
 class Employee(models.Model):
-    employee_id = models.CharField(max_length=50, null=True, blank=True, verbose_name="Xodim ID", help_text="Xodim ID")
+    employee_id = models.CharField(max_length=50, null=True, blank=True, verbose_name="Xodim ID", help_text="Xodim ID", unique=True)
     citizenship = models.CharField(max_length=100, null=True, blank=True, verbose_name="Fuqaroligi", help_text="Fuqaroligini kirting")
     passport = models.CharField(max_length=9, null=True, blank=True, verbose_name="Passport seriyasi", help_text="Passport seriyasini kiritish lozim")
     personal_number = models.CharField(max_length=14, null=True, blank=True, verbose_name="Shaxsiy raqami (JSHER)", help_text="Shaxsiy raqamini kiritish lozim")
@@ -47,3 +64,5 @@ class Employee(models.Model):
             birth_date = datetime.strptime(self.bithday, "%d.%m.%Y")
             self.age = datetime.now().year - birth_date.year
         super(Employee, self).save(*args, **kwargs)
+
+

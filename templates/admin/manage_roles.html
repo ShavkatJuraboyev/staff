@@ -1,0 +1,16 @@
+<form method="POST">
+    {% csrf_token %}
+    <label for="role_name">Rol nomi:</label>
+    <input type="text" id="role_name" name="role_name" required>
+    
+    <label for="permissions">Ruxsatlar (JSON formatda):</label>
+    <textarea id="permissions" name="permissions" required></textarea>
+    
+    <button type="submit">Yaratish</button>
+</form>
+
+<ul>
+    {% for role in roles %}
+    <li>{{ role.name }} - {{ role.permissions }}</li>
+    {% endfor %}
+</ul>
