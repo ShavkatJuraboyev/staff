@@ -25,22 +25,11 @@ class Employee(models.Model):
     citizenship = models.CharField(max_length=100, null=True, blank=True, verbose_name="Fuqaroligi", help_text="Fuqaroligini kirting")
     passport = models.CharField(max_length=9, null=True, blank=True, verbose_name="Passport seriyasi", help_text="Passport seriyasini kiritish lozim")
     personal_number = models.CharField(max_length=14, null=True, blank=True, verbose_name="Shaxsiy raqami (JSHER)", help_text="Shaxsiy raqamini kiritish lozim")
-    faculty = models.CharField(max_length=100, null=True, blank=True, verbose_name="Fakulteti", help_text="Fakultetini kiritish lozim")
-    department = models.CharField(max_length=100, null=True, blank=True, verbose_name="Kafedra/Bo'lim", help_text="Kafedra/Bo'limini kiritish lozim")
-    frist_name = models.CharField(max_length=50, null=True, blank=True, verbose_name="Ismi", help_text="Ismini kiritish lozim")
+    first_name  = models.CharField(max_length=50, null=True, blank=True, verbose_name="Ismi", help_text="Ismini kiritish lozim")
     last_name = models.CharField(max_length=50, null=True, blank=True, verbose_name="Familiyasi", help_text="Familiyasini kiritish lozim")
     sur_name = models.CharField(max_length=50, null=True, blank=True, verbose_name="Otasining ismi", help_text="Otasining ismini kiritish lozim")
-    labor_form = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ish shakli", help_text="Ish shaklini kiritish lozim")
-    stavka = models.CharField(max_length=100, null=True, blank=True, verbose_name="Stavka", help_text="Stavkani kiritish lozim")
-    position = models.CharField(max_length=100, null=True, blank=True, verbose_name="Lavozimi", help_text="Lavozimini kiritish lozim")
     academic_degree = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ilmiy darajasi", help_text="Ilmiy darajasini kiriting")
     academic_title = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ilmiy unvon", help_text="Ilmiy unvonini kiriting")
-    expertise = models.CharField(max_length=200, null=True, blank=True, verbose_name="Mutaxassisligi", help_text="Mutaxassisligini kiritish lozim")
-    start_position = models.CharField(max_length=10, null=True, blank=True, verbose_name="Ishga kirgan sana", help_text="Ishga kirigan sanasini kiritish lozim")
-    contract_number = models.CharField(max_length=100, null=True, blank=True, verbose_name="Shartnoma raqami", help_text="Shartnoma raqamini kiriting")
-    contract_date = models.CharField(max_length=100, null=True, blank=True, verbose_name="Shartnoma sanasi", help_text="Shartnoma sanasini kiriting")
-    order_number = models.CharField(max_length=100, null=True, blank=True, verbose_name="Buyruq raqami", help_text="Buyruq raqamini kiriting")
-    order_date = models.CharField(max_length=100, null=True, blank=True, verbose_name="Buyruq sanasi", help_text="Buyruq sanasini kiriting")
     bithday = models.CharField(max_length=20, null=True, blank=True, verbose_name="Tug'ilgan kun", help_text="Tug'ilgan kunini kiritish lozim")
     age = models.IntegerField(null=True, blank=True, verbose_name="Yoshi", help_text="Yoshini kiritish lozim")
     gender = models.CharField(max_length=10, null=True, blank=True, verbose_name="Jinsi", help_text="Jinsini kiritish lozim")
@@ -65,4 +54,27 @@ class Employee(models.Model):
             self.age = datetime.now().year - birth_date.year
         super(Employee, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.employee_id}-{self.first_name}"
 
+class Departments(models.Model):
+    employees = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name="Xodimlar", related_name="xodim")
+    faculty = models.CharField(max_length=100, null=True, blank=True, verbose_name="Fakulteti", help_text="Fakultetini kiritish lozim")
+    department = models.CharField(max_length=100, null=True, blank=True, verbose_name="Kafedra/Bo'lim", help_text="Kafedra/Bo'limini kiritish lozim")
+    labor_form = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ish shakli", help_text="Ish shaklini kiritish lozim")
+    stavka = models.CharField(max_length=100, null=True, blank=True, verbose_name="Stavka", help_text="Stavkani kiritish lozim")
+    position = models.CharField(max_length=100, null=True, blank=True, verbose_name="Lavozimi", help_text="Lavozimini kiritish lozim")
+    expertise = models.CharField(max_length=200, null=True, blank=True, verbose_name="Mutaxassisligi", help_text="Mutaxassisligini kiritish lozim")
+    start_position = models.CharField(max_length=10, null=True, blank=True, verbose_name="Ishga kirgan sana", help_text="Ishga kirigan sanasini kiritish lozim")
+    contract_number = models.CharField(max_length=100, null=True, blank=True, verbose_name="Shartnoma raqami", help_text="Shartnoma raqamini kiriting")
+    contract_date = models.CharField(max_length=100, null=True, blank=True, verbose_name="Shartnoma sanasi", help_text="Shartnoma sanasini kiriting")
+    order_number = models.CharField(max_length=100, null=True, blank=True, verbose_name="Buyruq raqami", help_text="Buyruq raqamini kiriting")
+    order_date = models.CharField(max_length=100, null=True, blank=True, verbose_name="Buyruq sanasi", help_text="Buyruq sanasini kiriting")
+
+    class Meta:
+        verbose_name = "Xodimlar bo'limi"
+        verbose_name_plural = "Xodimlar bo'limi"
+
+    def __str__(self):
+        return f"{self.employees}-{self.employees.last_name}"
+    

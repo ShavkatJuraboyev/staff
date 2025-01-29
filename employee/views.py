@@ -1,6 +1,6 @@
 import openpyxl, requests, json # Excel fayllarini o'qish uchun kutubxona
 from django.shortcuts import render, redirect # render va redirect kutubxonasini import qilamiz
-from employee.models import Employee, Role, UserRole # Talabalar modelini import qilamiz
+from employee.models import Employee, Role, UserRole, Departments # Talabalar modelini import qilamiz
 from django.contrib import messages # Xabarlar uchun
 from django.db.models import Q # Q kutubxonasini import qilamiz
 from django.core.paginator import Paginator # Paginator kutubxonasini import qilamiz
@@ -41,6 +41,73 @@ def logOut(request):
     logout(request)
     return redirect("user_login")
  
+@login_decorator
+@role_required("add_user")
+def upload_excel(request):
+    if request.method == "POST" and request.FILES.get("excel_file"):
+        excel_file = request.FILES["excel_file"]
+        try:
+            workbook = openpyxl.load_workbook(excel_file)
+            sheet = workbook.active
+
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                # Excel qatoridagi ma'lumotlar
+                employee_data = {
+                    'employee_id': row[0],
+                    'citizenship': row[1],
+                    'passport': row[2],
+                    'personal_number': row[3],
+                    'frist_name': row[6],
+                    'last_name': row[7],
+                    'sur_name': row[8],
+                    'academic_degree': row[12],
+                    'academic_title': row[13],
+                    'bithday': row[20],
+                    'gender': row[22],
+                    'email': row[23],
+                    'phone': row[24],
+                    'permanent_registration': row[25]
+                }
+
+                department_data = {
+                    'faculty': row[4],
+                    'department': row[5],
+                    'labor_form': row[9],
+                    'stavka': row[10],
+                    'position': row[11],
+                    'expertise': row[14],
+                    'start_position': row[15],
+                    'contract_number': row[16],
+                    'contract_date': row[17],
+                    'order_number': row[18],
+                    'order_date': row[19],
+                }
+
+                # Employee ma'lumotlarini saqlash yoki yangilash
+                employee, created = Employee.objects.update_or_create(
+                    employee_id=employee_data['employee_id'],
+                    defaults=employee_data,
+                )
+
+                # Departments ma'lumotlarini saqlash yoki yangilash
+                if employee:
+                    Departments.objects.update_or_create(
+                        employees=employee,
+                        faculty=department_data['faculty'],
+                        department=department_data['department'],
+                        defaults=department_data,
+                    )
+
+            messages.success(request, "Ma'lumotlar muvaffaqiyatli yuklandi!")
+        except IntegrityError as e:
+            messages.error(request, f"Xato yuz berdi: {str(e)}")
+        except Exception as e:
+            messages.error(request, f"Xatolik: {str(e)}")
+
+        return redirect("upload_excel")
+
+    return render(request, "admin/upload_excel.html")
+
 
 @login_decorator
 @role_required("download_user")
@@ -82,7 +149,6 @@ def get_filtered_employees(request):
         'nationality', 'place_of_birth', 'city', 'graduation_end_year', 'end_education'
     ))
     return JsonResponse({'employees': data})
-
 
 def get_employment_info(hemis_id): # Hemis ID bo'yicha ish joyi ma'lumotlarini olish
     """Hemis id kiritilishi lozim"""
@@ -134,66 +200,12 @@ def export_employees_to_excel(request):
     workbook.save(response)
     return response
 
-@login_decorator
-@role_required("add_user")
-def upload_excel(request):  # Excel faylni yuklash
-    if request.method == "POST" and request.FILES.get('excel_file'):  # POST so'rovni tekshirish
-        excel_file = request.FILES['excel_file']  # Excel faylini olish
-
-        # Faylni ochish
-        try:
-            workbook = openpyxl.load_workbook(excel_file)
-            sheet = workbook.active
-
-            # Excel faylidagi qatorlarga o'qish
-            for row in sheet.iter_rows(min_row=2, values_only=True):  # 1-qatordan keyingi qatorlar
-                employee_id = row[0]  # Xodim ID
-
-                # Mavjud xodimni tekshirish va yangilash yoki yangi xodim yaratish
-                employee, created = Employee.objects.update_or_create(
-                    employee_id=employee_id,  # employee_id bo'yicha izlash
-                    defaults={
-                        'citizenship': row[1],
-                        'passport': row[2],
-                        'personal_number': row[3],
-                        'faculty': row[4],
-                        'department': row[5],
-                        'frist_name': row[6],
-                        'last_name': row[7],
-                        'sur_name': row[8],
-                        'labor_form': row[9],
-                        'stavka': row[10],
-                        'position': row[11],
-                        'academic_degree': row[12],
-                        'academic_title': row[13],
-                        'expertise': row[14],
-                        'start_position': row[15],
-                        'contract_number': row[16],
-                        'contract_date': row[17],
-                        'order_number': row[18],
-                        'order_date': row[19],
-                        'bithday': row[20],
-                        'gender': row[22],
-                        'email': row[23],
-                        'phone': row[24],
-                        'permanent_registration': row[25],
-                    }
-                )
-                # Employee.objects.create() bilan bir xil, faqat yangilash yoki yaratish amalga oshadi
-            messages.success(request, "Ma'lumotlar muvaffaqiyatli saqlandi!")  # Xabar chiqarish
-        except IntegrityError as e:  # Unikal constraint xatoliklarini tekshirish
-            messages.error(request, f"Xato yuz berdi: {str(e)}")  # Xabar chiqarish
-        except Exception as e:  # Boshqa xatoliklarni tekshirish
-            messages.error(request, f"Xatolik: {str(e)}")  # Xabar chiqarish
-        
-        return redirect('upload_excel')  # Foydalanuvchini qaytarish
-
-    return render(request, 'admin/upload_excel.html')  # Agar POST bo'lmasa, faylni yuklash sahifasini chiqarish
 
 @login_decorator
 @role_required("view_reports")
-def all_employees(request):
-    employees = Employee.objects.all().order_by('-id')  # Barcha xodimlarni olish
+def all_employees(request): 
+    employees = Employee.objects.prefetch_related("xodim").all().order_by('-id')  # Barcha xodimlarni olish
+
     query = request.GET.get('q', '')  # Qidiruv uchun so'rov
     katta_yosh = request.GET.get('katta', None)  # Katta yosh filtri
     kichik_yosh = request.GET.get('kichik', None)  # Kichik yosh filtri
@@ -206,14 +218,14 @@ def all_employees(request):
 
     academic_degree = Employee.objects.filter(academic_degree__isnull=False).values_list('academic_degree', flat=True).distinct() # Ilmiy darajalar
     academic_title = Employee.objects.filter(academic_title__isnull=False).values_list('academic_title', flat=True).distinct() # Ilmiy unvonlar
-    department = Employee.objects.filter(department__isnull=False).values_list('department', flat=True).distinct() # Kafedralar
-    place_of_birth = Employee.objects.filter(place_of_birth__isnull=False).values_list('place_of_birth', flat=True).distinct() # Kafedralar
+    department = Departments.objects.filter(department__isnull=False).values_list('department', flat=True).distinct() # Kafedralar
+    place_of_birth = Employee.objects.filter(place_of_birth__isnull=False).values_list('place_of_birth', flat=True).distinct() # Tug'ilgan joylar
     city = Employee.objects.filter(city__isnull=False).values_list('city', flat=True).distinct() # Doimiy yashash joyi
     
     # Filtrlash
     if query:
         employees = employees.filter(
-            Q(frist_name__icontains=query) |
+            Q(first_name__icontains=query) |
             Q(last_name__icontains=query) |
             Q(sur_name__icontains=query) |
             Q(employee_id__icontains=query) |
@@ -227,26 +239,24 @@ def all_employees(request):
     if gender:
         employees = employees.filter(gender=gender)  # Jinsi bo'yicha filtr
     if ilmiy_daraja:
-        employees = employees.filter(academic_degree=ilmiy_daraja)  # Ilmiy daraja bo'yicha filtr
+        employees = employees.filter(academic_degree__icontains=ilmiy_daraja)  # Ilmiy daraja bo'yicha filtr
     if ilmiy_unvon:
-        employees = employees.filter(academic_title=ilmiy_unvon)  # Ilmiy unvon bo'yicha filtr
+        employees = employees.filter(academic_title__icontains=ilmiy_unvon)  # Ilmiy unvon bo'yicha filtr
     if kafedra:
-        employees = employees.filter(department=kafedra)  # Kafedra bo'yicha filtr
+        employees = employees.filter(xodim__department__icontains=kafedra)  # Kafedra bo'yicha filtr
     if tugilgan_joyi:
-        employees = employees.filter(place_of_birth=tugilgan_joyi)  # Tug'ilgan joyi filtr
+        employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
     if permanent:
-        employees = employees.filter(city=permanent) # Doimiy yashash joyi filtr
-
+        employees = employees.filter(city__icontains=permanent) # Doimiy yashash joyi filtr
 
     # Pagination
     page_size = request.GET.get('page_size', 10)  # Default 10
     paginator = Paginator(employees, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
+    print(page_obj)
     context = {
         'page_obj': page_obj,
-        'employees': employees,
         'segment': 'employee',
         "academic_degree": academic_degree,
         "academic_title": academic_title,
@@ -255,6 +265,7 @@ def all_employees(request):
         "permanent_registration": city,  # Doimiy yashash joylar
     }
     return render(request, 'employee/all_employees.html', context=context)
+
 
 @login_decorator
 @role_required("view_reports")

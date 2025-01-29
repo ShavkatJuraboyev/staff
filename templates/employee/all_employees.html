@@ -3,12 +3,12 @@
 
 {% block content %}
 {% if messages %}
-        <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 <div class="container-xxl flex-grow-1 container-p-y">
 
     <!-- DataTable with Buttons -->
@@ -28,7 +28,8 @@
                                     <span class="d-none d-sm-inline-block">Ma'lumot qo'shish</span>
                                 </span>
                             </a> &nbsp;
-                            <a href="{% url 'upload_excel' %}" class="btn btn-secondary create-new btn-primary" style="color: aliceblue;">
+                            <a href="{% url 'upload_excel' %}" class="btn btn-secondary create-new btn-primary"
+                                style="color: aliceblue;">
                                 <span>
                                     <i class='bx bxs-file'></i>
                                     <span class="d-none d-sm-inline-block">fayl orqali qo'shish</span>
@@ -65,30 +66,35 @@
                         <form method="get" action="">
                             <div id="DataTables_Table_0_filter" class="dataTables_filter">
                                 <label>Qidirish:
-                                    <input type="search"  name="q" class="form-control" placeholder="qidirish..." aria-controls="DataTables_Table_0">
+                                    <input type="search" name="q" class="form-control" placeholder="qidirish..."
+                                        aria-controls="DataTables_Table_0">
                                 </label>
                             </div>
                         </form>
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <form method="get" id="filter-form" class="d-flex flex-wrap gap-2">
-                            
+
                             <div>
                                 <label>Yoshdan katta:
-                                    <input type="number" id="kattaInput" name="katta" class="form-control" placeholder="Yoshdan katta..." value="{{ request.GET.katta }}">
+                                    <input type="number" id="kattaInput" name="katta" class="form-control"
+                                        placeholder="Yoshdan katta..." value="{{ request.GET.katta }}">
                                 </label>
                             </div>
                             <div>
                                 <label>Yoshdan kichik:
-                                    <input type="number" id="kichikInput" name="kichik" class="form-control" placeholder="Yoshdan kichik..." value="{{ request.GET.kichik }}">
+                                    <input type="number" id="kichikInput" name="kichik" class="form-control"
+                                        placeholder="Yoshdan kichik..." value="{{ request.GET.kichik }}">
                                 </label>
                             </div>
                             <div>
                                 <label>Jinsi:
                                     <select id="genderSelect" name="gender" class="form-select">
                                         <option value="">Hammasi</option>
-                                        <option value="Erkak" {% if request.GET.gender == 'Erkak' %}selected{% endif %}>Erkak</option>
-                                        <option value="Ayol" {% if request.GET.gender == 'Ayol' %}selected{% endif %}>Ayol</option>
+                                        <option value="Erkak" {% if request.GET.gender == 'Erkak' %}selected{% endif %}>
+                                            Erkak</option>
+                                        <option value="Ayol" {% if request.GET.gender == 'Ayol' %}selected{% endif %}>
+                                            Ayol</option>
                                     </select>
                                 </label>
                             </div>
@@ -97,7 +103,9 @@
                                     <select id="ilmiyDarajaSelect" name="ilmiy_daraja" class="form-select">
                                         <option value="">Hammasi</option>
                                         {% for academic_deg in academic_degree %}
-                                        <option value="{{ academic_deg }}" {% if request.GET.ilmiy_daraja == academic_deg %}selected{% endif %}>{{ academic_deg }}</option>
+                                        <option value="{{ academic_deg }}"
+                                            {% if request.GET.ilmiy_daraja == academic_deg %}selected{% endif %}>
+                                            {{ academic_deg }}</option>
                                         {% endfor %}
                                     </select>
                                 </label>
@@ -107,7 +115,9 @@
                                     <select id="ilmiyUnvonSelect" name="ilmiy_unvon" class="form-select">
                                         <option value="">Hammasi</option>
                                         {% for academic_tit in academic_title %}
-                                        <option value="{{ academic_tit }}" {% if request.GET.ilmiy_unvon == academic_tit %}selected{% endif %}>{{ academic_tit }}</option>
+                                        <option value="{{ academic_tit }}"
+                                            {% if request.GET.ilmiy_unvon == academic_tit %}selected{% endif %}>
+                                            {{ academic_tit }}</option>
                                         {% endfor %}
                                     </select>
                                 </label>
@@ -117,7 +127,9 @@
                                     <select name="kafedra" id="departmentSelect" class="form-select">
                                         <option value="">Hammasi</option>
                                         {% for depart in department %}
-                                        <option value="{{ depart }}" {% if request.GET.kafedra == depart %}selected{% endif %}>{{ depart }}</option>
+                                        <option value="{{ depart }}"
+                                            {% if request.GET.kafedra == depart %}selected{% endif %}>{{ depart }}
+                                        </option>
                                         {% endfor %}
                                     </select>
                                 </label>
@@ -127,7 +139,9 @@
                                     <select name="placeofbirtht" id="placeofbirthtSelect" class="form-select">
                                         <option value="">Hammasi</option>
                                         {% for place_of in place_of_birth %}
-                                        <option value="{{ place_of }}" {% if request.GET.placeofbirtht == place_of %}selected{% endif %}>{{ place_of }}</option>
+                                        <option value="{{ place_of }}"
+                                            {% if request.GET.placeofbirtht == place_of %}selected{% endif %}>
+                                            {{ place_of }}</option>
                                         {% endfor %}
                                     </select>
                                 </label>
@@ -137,18 +151,22 @@
                                     <select name="permanent" id="permanentSelect" class="form-select">
                                         <option value="">Hammasi</option>
                                         {% for permanent_registr in permanent_registration %}
-                                        <option value="{{ permanent_registr }}" {% if request.GET.permanent == permanent_registr %}selected{% endif %}>{{ permanent_registr }}</option>
+                                        <option value="{{ permanent_registr }}"
+                                            {% if request.GET.permanent == permanent_registr %}selected{% endif %}>
+                                            {{ permanent_registr }}</option>
                                         {% endfor %}
                                     </select>
                                 </label>
                             </div>
-                            <button type="submit" class="btn btn-secondary dt-action-buttons text-end">Filterlash</button>
-                    
+                            <button type="submit"
+                                class="btn btn-secondary dt-action-buttons text-end">Filterlash</button>
+
                         </form>
                     </div>
                 </div>
                 <br>
-                <table class="dt-complex-header table table-bordered dataTable no-footer" id="employeeTable" border="1" style="width: 1392px;">
+                <table class="dt-complex-header table table-bordered dataTable no-footer" id="employeeTable" border="1"
+                    style="width: 1392px;">
                     <thead>
                         <tr>
                             <th style="width: 20px;">T/R</th>
@@ -171,14 +189,16 @@
                                 {{ forloop.counter }}
                             </td>
                             <td>
-                                {{ employee_data.employee_id }} 
+                                {{ employee_data.employee_id }}
                             </td>
                             <td>
                                 <a href="{% url 'view_employees' employee_data.employee_id %}">
                                     <div class="d-flex justify-content-start align-items-center user-name">
                                         <div class="d-flex flex-column"><span
-                                                class="emp_name text-truncate">{{ employee_data.last_name }} {{ employee_data.frist_name }}</span><small
-                                                class="emp_post text-truncate text-muted">{{employee_data.sur_name}}</small></div>
+                                                class="emp_name text-truncate">{{ employee_data.last_name }}
+                                                {{ employee_data.frist_name }}</span><small
+                                                class="emp_post text-truncate text-muted">{{employee_data.sur_name}}</small>
+                                        </div>
                                     </div>
                                 </a>
                             </td>
@@ -203,18 +223,20 @@
                             <td>
                                 {{employee_data.gender}}
                             </td>
-                            
+
                             <td>
                                 <div class="d-inline-block"><a href="javascript:;"
                                         class="btn btn-icon dropdown-toggle hide-arrow me-1"
                                         data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded bx-md"></i></a>
                                     <div class="dropdown-menu dropdown-menu-end m-0">
-                                        <a href="{% url 'view_employees' employee_data.employee_id %}" class="dropdown-item">Ko'rish <i class="bx bx-show bx-md"></i></a>
-                                        <a href="{% url 'edit_employees' employee_data.employee_id %}" class="dropdown-item">Taxrirlash <i
-                                                class="bx bx-edit bx-md"></i></a>
+                                        <a href="{% url 'view_employees' employee_data.employee_id %}"
+                                            class="dropdown-item">Ko'rish <i class="bx bx-show bx-md"></i></a>
+                                        <a href="{% url 'edit_employees' employee_data.employee_id %}"
+                                            class="dropdown-item">Taxrirlash <i class="bx bx-edit bx-md"></i></a>
                                         <div class="dropdown-divider"></div>
                                         <button type="button" class="dropdown-item text-danger delete-record"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal" data-employee-id="{{employee_data.employee_id}}">
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                            data-employee-id="{{employee_data.employee_id}}">
                                             O'chirish <i class="bx bx-trash bx-md"></i>
                                         </button>
                                     </div>
@@ -231,15 +253,16 @@
                             {{ page_obj.end_index }} gacha
                         </div>
                     </div>
-                    
+
                     <div class="col-sm-12 col-md-6">
                         <div class="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate">
-                            
+
                             <ul class="pagination">
                                 <button type="button" id="export-excel" class="btn btn-success">
                                     <i class='bx bxs-download'></i>Filter yuklash
                                 </button> &nbsp;
-                                <button type="button" class="btn btn-success" onclick="window.location.href='{% url 'export_employees' %}'">
+                                <button type="button" class="btn btn-success"
+                                    onclick="window.location.href='{% url 'export_employees' %}'">
                                     <i class='bx bxs-download'></i>&nbsp; Barchasini yuklash
                                 </button>
                                 {% if page_obj.has_previous %}
@@ -328,114 +351,105 @@
 
 <script>
     // DOM tayyor bo'lganda bajariladigan ishlar
-document.addEventListener("DOMContentLoaded", function () {
-    setupSorting();
-    setupDeleteModal();
-    setupPageSizeChange();
-    setupExcelExport();
-});
-
-// Jadvalni tartiblash funksiyasi
-function setupSorting() {
-    const table = document.getElementById("employeeTable");
-    const tbody = table.querySelector("tbody");
-    const headers = table.querySelectorAll("thead th");
-    let sortStates = Array.from(headers, () => 0); // Har bir ustun uchun boshlang'ich holat
-
-    headers.forEach((header, index) => {
-        if (!header.classList.contains("sorting_disabled")) {
-            header.style.cursor = "pointer";
-            header.addEventListener("click", function () {
-                const rows = Array.from(tbody.querySelectorAll("tr"));
-                sortStates[index] = (sortStates[index] + 1) % 3; // 0 -> boshlang'ich, 1 -> o'sish, 2 -> kamayish
-
-                if (sortStates[index] === 0) {
-                    rows.sort((a, b) => a.rowIndex - b.rowIndex); // Asl tartibga qaytarish
-                } else {
-                    rows.sort((a, b) => {
-                        const aValue = a.children[index].innerText.trim();
-                        const bValue = b.children[index].innerText.trim();
-
-                        if (!isNaN(aValue) && !isNaN(bValue)) {
-                            return sortStates[index] === 1 ? aValue - bValue : bValue - aValue;
-                        } else {
-                            return sortStates[index] === 1
-                                ? aValue.localeCompare(bValue)
-                                : bValue.localeCompare(aValue);
-                        }
-                    });
-                }
-
-                tbody.innerHTML = "";
-                rows.forEach(row => tbody.appendChild(row));
-            });
-        }
+    document.addEventListener("DOMContentLoaded", function() {
+        setupSorting();
+        setupDeleteModal();
+        setupPageSizeChange();
+        setupExcelExport();
     });
-}
-
-// Modal orqali o'chirish funksiyasi
-function setupDeleteModal() {
-    const deleteModal = document.getElementById("deleteModal");
-    const deleteForm = document.getElementById("deleteForm");
-    deleteModal.addEventListener("show.bs.modal", function (event) {
-        const button = event.relatedTarget;
-        const employeeId = button.getAttribute("data-employee-id");
-        deleteForm.action = '{% url "delete_employees" 0 %}'.replace('/0/', '/' + employeeId + '/');
-    });
-}
-
-// Sahifa o'lchamini o'zgartirish funksiyasi
-function setupPageSizeChange() {
-    $(document).ready(function () {
-        $('#pageSize').on('change', function () {
-            var selectedPageSize = $(this).val();
-            window.location.href = "?page_size=" + selectedPageSize;
+    // Jadvalni tartiblash funksiyasi
+    function setupSorting() {
+        const table = document.getElementById("employeeTable");
+        const tbody = table.querySelector("tbody");
+        const headers = table.querySelectorAll("thead th");
+        let sortStates = Array.from(headers, () => 0); // Har bir ustun uchun boshlang'ich holat
+        headers.forEach((header, index) => {
+            if (!header.classList.contains("sorting_disabled")) {
+                header.style.cursor = "pointer";
+                header.addEventListener("click", function() {
+                    const rows = Array.from(tbody.querySelectorAll("tr"));
+                    sortStates[index] = (sortStates[index] + 1) %
+                    3; // 0 -> boshlang'ich, 1 -> o'sish, 2 -> kamayish
+                    if (sortStates[index] === 0) {
+                        rows.sort((a, b) => a.rowIndex - b.rowIndex); // Asl tartibga qaytarish
+                    } else {
+                        rows.sort((a, b) => {
+                            const aValue = a.children[index].innerText.trim();
+                            const bValue = b.children[index].innerText.trim();
+                            if (!isNaN(aValue) && !isNaN(bValue)) {
+                                return sortStates[index] === 1 ? aValue - bValue : bValue -
+                                    aValue;
+                            } else {
+                                return sortStates[index] === 1 ?
+                                    aValue.localeCompare(bValue) :
+                                    bValue.localeCompare(aValue);
+                            }
+                        });
+                    }
+                    tbody.innerHTML = "";
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            }
         });
-    });
-}
-
-// Excel eksport qilish funksiyasi
-function setupExcelExport() {
-    document.getElementById("export-excel").addEventListener("click", function () {
-        // Formdagi qiymatlarni olish
-        const search = document.getElementById("searchInput")?.value || "";
-        const katta = document.getElementById("kattaInput")?.value || "";
-        const kichik = document.getElementById("kichikInput")?.value || "";
-        const gender = document.getElementById("genderSelect")?.value || "";
-        const ilmiyDaraja = document.getElementById("ilmiyDarajaSelect")?.value || "";
-        const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect")?.value || "";
-        const kafedra = document.getElementById("departmentSelect")?.value || "";
-        const tugilgan_joy = document.getElementById("placeofbirthtSelect")?.value || "";
-        const permanents = document.getElementById("permanentSelect")?.value || "";
-    
-        // AJAX so'rov
-        const queryParams = new URLSearchParams({
-            q: search,
-            katta: katta,
-            kichik: kichik,
-            gender: gender,
-            ilmiy_daraja: ilmiyDaraja,
-            ilmiy_unvon: ilmiyUnvon,
-            kafedra: kafedra,
-            placeofbirtht: tugilgan_joy,
-            permanent: permanents
+    }
+    // Modal orqali o'chirish funksiyasi
+    function setupDeleteModal() {
+        const deleteModal = document.getElementById("deleteModal");
+        const deleteForm = document.getElementById("deleteForm");
+        deleteModal.addEventListener("show.bs.modal", function(event) {
+            const button = event.relatedTarget;
+            const employeeId = button.getAttribute("data-employee-id");
+            deleteForm.action = '{% url "delete_employees" 0 %}'.replace('/0/', '/' + employeeId + '/');
         });
-
-        fetch(`/api/employees/?${queryParams.toString()}`)
-            .then(response => response.json())
-            .then(data => {
-                const employees = data.employees;
-                const worksheet = XLSX.utils.json_to_sheet(employees);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Xodimlar");
-                XLSX.writeFile(workbook, "Xodimlar_filter.xlsx");
-            })
-            .catch(error => {
-                console.error("Ma'lumotlarni olishda xatolik yuz berdi:", error);
+    }
+    // Sahifa o'lchamini o'zgartirish funksiyasi
+    function setupPageSizeChange() {
+        $(document).ready(function() {
+            $('#pageSize').on('change', function() {
+                var selectedPageSize = $(this).val();
+                window.location.href = "?page_size=" + selectedPageSize;
             });
-    });
-}
-
+        });
+    }
+    // Excel eksport qilish funksiyasi
+    function setupExcelExport() {
+        document.getElementById("export-excel").addEventListener("click", function() {
+            // Formdagi qiymatlarni olish
+            const search = document.getElementById("searchInput") ? .value || "";
+            const katta = document.getElementById("kattaInput") ? .value || "";
+            const kichik = document.getElementById("kichikInput") ? .value || "";
+            const gender = document.getElementById("genderSelect") ? .value || "";
+            const ilmiyDaraja = document.getElementById("ilmiyDarajaSelect") ? .value || "";
+            const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect") ? .value || "";
+            const kafedra = document.getElementById("departmentSelect") ? .value || "";
+            const tugilgan_joy = document.getElementById("placeofbirthtSelect") ? .value || "";
+            const permanents = document.getElementById("permanentSelect") ? .value || "";
+            // AJAX so'rov
+            const queryParams = new URLSearchParams({
+                q: search,
+                katta: katta,
+                kichik: kichik,
+                gender: gender,
+                ilmiy_daraja: ilmiyDaraja,
+                ilmiy_unvon: ilmiyUnvon,
+                kafedra: kafedra,
+                placeofbirtht: tugilgan_joy,
+                permanent: permanents
+            });
+            fetch(`/api/employees/?${queryParams.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    const employees = data.employees;
+                    const worksheet = XLSX.utils.json_to_sheet(employees);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Xodimlar");
+                    XLSX.writeFile(workbook, "Xodimlar_filter.xlsx");
+                })
+                .catch(error => {
+                    console.error("Ma'lumotlarni olishda xatolik yuz berdi:", error);
+                });
+        });
+    }
 </script>
 
 <!-- <script>
