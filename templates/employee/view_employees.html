@@ -21,33 +21,37 @@
                     <p><strong>Pasport raqami:</strong> {{ employee.passport }}</p>
                     <p><strong>JSHSHIR-kod:</strong> {{ employee.personal_number }}</p>
                     <p><strong>Yoshi:</strong> {{ employee.age }}</p>
-                    <p><strong>Fakultet:</strong> {{ employee.faculty }}</p>
-                    <p><strong>Kafedra/Bo'lim:</strong> {{ employee.department }}</p>
-                    <p><strong>Mehnat shakli:</strong> {{ employee.labor_form}}</p>
-                    <p><strong>Stavka:</strong> {{ employee.stavka }} </p>
-                </div>
-                <div class="col-3">
-                    <p><strong>Lavozim:</strong> {{ employee.position }}</p>
                     <p><strong>Telefon raqam:</strong> {{ employee.phone }}</p>
                     <p><strong>Ilmiy darajasi:</strong> {{employee.academic_degree}}</p>
                     <p><strong>Ilmiy unvon:</strong> {{ employee.academic_title }}</p>
-                    <p><strong>Mutaxassisligi:</strong> {{ employee.expertise }}</p>
-                    <p><strong>Ishga kirgan sana:</strong> {{ employee.start_position }}</p>
-                    <p><strong>Shartnoma raqami:</strong> {{ employee.contract_number}}</p>
-                    <p><strong>Shartnoma sanasi:</strong> {{ employee.contract_date }}</p>
-                    <p><strong>Buyruq raqami:</strong> {{ employee.order_number }}</p>
-                    <p><strong>Buyruq sanasi:</strong> {{ employee.order_date }}</p>
-                </div>
-                <div class="col-3">
-                    <p><strong>Jinsi:</strong> {{employee.gender}}</p>
+                    <p><strong>Fuqaroligi:</strong> {{ employee.citizenship }}</p>
                     <p><strong>Email:</strong> {{ employee.email }}</p>
                     <p><strong>Doimiy yashash joyi:</strong> {{ employee.permanent_registration }}</p>
+                </div>
+                <div class="col-3">
+                    <p><strong>Jinsi:</strong> {{ employee.gender }}</p>
                     <p><strong>Tashkiloti nomi:</strong> {{ employee.organization }}</p>
-                    <p><strong>Millati:</strong> {{ employee.nationality }}</p>
+                    <p><strong>Millati:</strong> {{employee.nationality}}</p>
                     <p><strong>Tug'ilgan joyi:</strong> {{ employee.place_of_birth }}</p>
                     <p><strong>Tuman yoki Shaxar:</strong> {{ employee.city }}</p>
-                    <p><strong>Oliy ta'lim muassasasini tugatgan yili:</strong> {{ employee.graduation_end_year }}</p>
                     <p><strong>Tugatgan oliy ta'limi nomi:</strong> {{ employee.end_education }}</p>
+                    <p><strong>Oliy ta'lim muassasasini tugatgan yili:</strong> {{ employee.graduation_end_year }}</p>
+                </div>
+                <div class="col-3">
+                    {% for department in employee_data %}
+                    <p><strong>Fakultet:</strong>{{ department.faculty }}</p>
+                    <p><strong>Kafedra/Bo'lim:</strong>{{ department.department }}</p>
+                    <p><strong>Ish shakli:</strong>{{ department.labor_form }}</p>
+                    <p><strong>Stavka:</strong>{{ department.stavka }}</p>
+                    <p><strong>Lavozimi:</strong>{{ department.position }}</p>
+                    <p><strong>Mutaxassisligi:</strong>{{ department.expertise }}</p>
+                    <p><strong>Ishga kirgan sana:</strong>{{ department.start_position }}</p>
+                    <p><strong>Shartnoma raqami:</strong>{{ department.contract_number }}</p>
+                    <p><strong>Shartnoma sanasi:</strong>{{ department.contract_date }}</p>
+                    <p><strong>Buyruq raqami:</strong>{{ department.order_number }}</p>
+                    <p><strong>Buyruq sanasi:</strong>{{ department.order_date }}</p>
+                    
+                {% endfor %}
                 </div>
             </div><br><hr>
             <a href="{% url 'all_employees'%}" class="btn btn-primary"><i class='bx bx-left-arrow-alt'></i> Ortga</a>

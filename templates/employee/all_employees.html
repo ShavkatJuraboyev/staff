@@ -32,7 +32,7 @@
                                 style="color: aliceblue;">
                                 <span>
                                     <i class='bx bxs-file'></i>
-                                    <span class="d-none d-sm-inline-block">fayl orqali qo'shish</span>
+                                    <span class="d-none d-sm-inline-block">Fayl orqali qo'shish</span>
                                 </span>
                             </a>
                         </div>
@@ -45,18 +45,10 @@
                                 {% csrf_token %}
                                 <label>
                                     Sahifadagi elementlar soni:
-                                    <select name="page_size" aria-controls="DataTables_Table_0" class="form-select"
-                                        id="pageSize">
-                                        <option value="10" {% if request.GET.page_size == "10" %}selected{% endif %}>10
-                                        </option>
-                                        <option value="25" {% if request.GET.page_size == "25" %}selected{% endif %}>25
-                                        </option>
-                                        <option value="50" {% if request.GET.page_size == "50" %}selected{% endif %}>50
-                                        </option>
-                                        <option value="75" {% if request.GET.page_size == "75" %}selected{% endif %}>75
-                                        </option>
-                                        <option value="100" {% if request.GET.page_size == "100" %}selected{% endif %}>
-                                            100</option>
+                                    <select name="page_size" aria-controls="DataTables_Table_0" class="form-select" id="pageSize">
+                                        <option value="50" {% if request.GET.page_size == "50" %}selected{% endif %}>50</option>
+                                        <option value="75" {% if request.GET.page_size == "75" %}selected{% endif %}>75</option>
+                                        <option value="100" {% if request.GET.page_size == "100" %}selected{% endif %}>100</option>
                                     </select>
                                 </label>
                             </form>
@@ -74,7 +66,6 @@
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <form method="get" id="filter-form" class="d-flex flex-wrap gap-2">
-
                             <div>
                                 <label>Yoshdan katta:
                                     <input type="number" id="kattaInput" name="katta" class="form-control"
@@ -123,12 +114,12 @@
                                 </label>
                             </div>
                             <div>
-                                <label>Kafedra/Bo'lim
-                                    <select name="kafedra" id="departmentSelect" class="form-select">
+                                <label>Lavozim
+                                    <select name="lavozim" id="laborSelect" class="form-select">
                                         <option value="">Hammasi</option>
-                                        {% for depart in department %}
-                                        <option value="{{ depart }}"
-                                            {% if request.GET.kafedra == depart %}selected{% endif %}>{{ depart }}
+                                        {% for labor in labor_form %}
+                                        <option value="{{ labor }}"
+                                            {% if request.GET.lavozim == labor %}selected{% endif %}>{{ labor }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -142,6 +133,18 @@
                                         <option value="{{ place_of }}"
                                             {% if request.GET.placeofbirtht == place_of %}selected{% endif %}>
                                             {{ place_of }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </div>
+                            <div>
+                                <label>Kafedra/Bo'lim
+                                    <select name="kafedra" id="departmentSelect" class="form-select">
+                                        <option value="">Hammasi</option>
+                                        {% for depart in department %}
+                                        <option value="{{ depart }}"
+                                            {% if request.GET.kafedra == depart %}selected{% endif %}>{{ depart }}
+                                        </option>
                                         {% endfor %}
                                     </select>
                                 </label>
@@ -172,79 +175,74 @@
                             <th style="width: 20px;">T/R</th>
                             <th style="width: 88px;">Xodim ID</th>
                             <th>Xodimlar F.I.O</th>
-                            <th>Telefoni</th>
-                            <th>Tug'ulgan yili</th>
-                            <th id="ageColumn" style="cursor: pointer;">Yoshi</th>
-                            <th>Ilmiy daraja</th>
-                            <th>Ilmiy unvon</th>
+                            <th>Tug'ilgan joy</th>
+                            <th>Ilmiydaraja va unvon</th>
+                            <th>Lavozim</th>
+                            <th>Ish shakli</th>
                             <th>Kafedra/Bo'lim</th>
+                            <th id="ageColumn" style="cursor: pointer;">Yoshi</th>
                             <th>Jinsi</th>
                             <th class="sorting_disabled" style="width: 88px;">Harakat</th>
                         </tr>
                     </thead>
                     <tbody id="content">
-                        {% for employee_data in page_obj %}
-                        <tr>
-                            <td>
-                                {{ forloop.counter }}
-                            </td>
-                            <td>
-                                {{ employee_data.employee_id }}
-                            </td>
-                            <td>
-                                <a href="{% url 'view_employees' employee_data.employee_id %}">
-                                    <div class="d-flex justify-content-start align-items-center user-name">
-                                        <div class="d-flex flex-column"><span
-                                                class="emp_name text-truncate">{{ employee_data.last_name }}
-                                                {{ employee_data.frist_name }}</span><small
-                                                class="emp_post text-truncate text-muted">{{employee_data.sur_name}}</small>
+                        
+                        {% for employee in page_obj %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ employee.employee_id }}</td>
+                                <td>
+                                    <a href="{% url 'view_employees' employee.employee_id %}">
+                                        <div class="d-flex justify-content-start align-items-center user-name">
+                                            <div class="d-flex flex-column">
+                                                <span class="emp_name text-truncate">
+                                                    {{ employee.fio }}
+                                                </span>
+                                                <small class="emp_post text-truncate text-muted">
+                                                    {{ employee.sur_name }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td>{{ employee.place_of_birth }}</td>
+                                <td>{{ employee.academic_degree_title }}</td>
+                                <td>{{ employee.position }}</td>
+                                <td>{{ employee.labor_form }}</td>
+                                <td>{{ employee.department }}</td>
+                                <td>{{ employee.age }}</td>
+                                <td>{{ employee.gender }}</td>
+                                <td>
+                                    <div class="d-inline-block">
+                                        <a href="javascript:;" class="btn btn-icon dropdown-toggle hide-arrow me-1" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded bx-md"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end m-0">
+                                            <a href="{% url 'view_employees' employee.employee_id %}" class="dropdown-item">
+                                                Ko'rish <i class="bx bx-show bx-md"></i>
+                                            </a>
+                                            <a href="{% url 'edit_employees' employee.employee_id %}" class="dropdown-item">
+                                                Tahrirlash <i class="bx bx-edit bx-md"></i>
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <button type="button" class="dropdown-item text-danger delete-record"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                    data-employee-id="{{ employee.employee_id }}">
+                                                O'chirish <i class="bx bx-trash bx-md"></i>
+                                            </button>
                                         </div>
                                     </div>
-                                </a>
-                            </td>
-                            <td>
-                                {{employee_data.phone}}
-                            </td>
-                            <td>
-                                {{employee_data.bithday}}
-                            </td>
-                            <td>
-                                {{employee_data.age}}
-                            </td>
-                            <td>
-                                {{employee_data.academic_degree}}
-                            </td>
-                            <td>
-                                {{employee_data.academic_title}}
-                            </td>
-                            <td>
-                                {{employee_data.department}}
-                            </td>
-                            <td>
-                                {{employee_data.gender}}
-                            </td>
-
-                            <td>
-                                <div class="d-inline-block"><a href="javascript:;"
-                                        class="btn btn-icon dropdown-toggle hide-arrow me-1"
-                                        data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded bx-md"></i></a>
-                                    <div class="dropdown-menu dropdown-menu-end m-0">
-                                        <a href="{% url 'view_employees' employee_data.employee_id %}"
-                                            class="dropdown-item">Ko'rish <i class="bx bx-show bx-md"></i></a>
-                                        <a href="{% url 'edit_employees' employee_data.employee_id %}"
-                                            class="dropdown-item">Taxrirlash <i class="bx bx-edit bx-md"></i></a>
-                                        <div class="dropdown-divider"></div>
-                                        <button type="button" class="dropdown-item text-danger delete-record"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                            data-employee-id="{{employee_data.employee_id}}">
-                                            O'chirish <i class="bx bx-trash bx-md"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9">Hech qanday ma'lumot topilmadi</td>
+                            </tr>
+                            {% endfor %}
                     </tbody>
+                    
+                    
+                    
                 </table>
                 <div class="row">
                     <div class="col-sm-12 col-md-6">
@@ -415,15 +413,16 @@
     function setupExcelExport() {
         document.getElementById("export-excel").addEventListener("click", function() {
             // Formdagi qiymatlarni olish
-            const search = document.getElementById("searchInput") ? .value || "";
-            const katta = document.getElementById("kattaInput") ? .value || "";
-            const kichik = document.getElementById("kichikInput") ? .value || "";
-            const gender = document.getElementById("genderSelect") ? .value || "";
-            const ilmiyDaraja = document.getElementById("ilmiyDarajaSelect") ? .value || "";
-            const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect") ? .value || "";
-            const kafedra = document.getElementById("departmentSelect") ? .value || "";
-            const tugilgan_joy = document.getElementById("placeofbirthtSelect") ? .value || "";
-            const permanents = document.getElementById("permanentSelect") ? .value || "";
+            const search = document.getElementById("searchInput")?.value || "";
+            const katta = document.getElementById("kattaInput")?.value || "";
+            const kichik = document.getElementById("kichikInput")?.value || "";
+            const gender = document.getElementById("genderSelect")?.value || "";
+            const ilmiyDaraja = document.getElementById("ilmiyDarajaSelect")?.value || "";
+            const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect")?.value || "";
+            const kafedra = document.getElementById("departmentSelect")?.value || "";
+            const tugilgan_joy = document.getElementById("placeofbirthtSelect")?.value || "";
+            const permanents = document.getElementById("permanentSelect")?.value || "";
+            const lavozim = document.getElementById("laborSelect")?.value || "";
             // AJAX so'rov
             const queryParams = new URLSearchParams({
                 q: search,
@@ -434,7 +433,8 @@
                 ilmiy_unvon: ilmiyUnvon,
                 kafedra: kafedra,
                 placeofbirtht: tugilgan_joy,
-                permanent: permanents
+                permanent: permanents,
+                lavozim: lavozim
             });
             fetch(`/api/employees/?${queryParams.toString()}`)
                 .then(response => response.json())
@@ -451,121 +451,5 @@
         });
     }
 </script>
-
-<!-- <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const table = document.getElementById("employeeTable");
-    const tbody = table.querySelector("tbody");
-    const headers = table.querySelectorAll("thead th");
-    let sortStates = Array.from(headers, () => 0); // Har bir ustun uchun boshlang'ich holat
-
-    headers.forEach((header, index) => {
-        if (!header.classList.contains("sorting_disabled")) { // Faqat tartiblashga ruxsat berilgan ustunlar uchun
-            header.style.cursor = "pointer"; // Ko'rsatkichni o'zgartirish
-            header.addEventListener("click", function () {
-                const rows = Array.from(tbody.querySelectorAll("tr"));
-                sortStates[index] = (sortStates[index] + 1) % 3; // 0 -> boshlang'ich, 1 -> o'sish, 2 -> kamayish
-
-                if (sortStates[index] === 0) {
-                    // Boshlang'ich holatga qaytarish
-                    rows.sort((a, b) => a.rowIndex - b.rowIndex);
-                } else {
-                    rows.sort((a, b) => {
-                        const aValue = a.children[index].innerText.trim();
-                        const bValue = b.children[index].innerText.trim();
-
-                        if (!isNaN(aValue) && !isNaN(bValue)) {
-                            // Agar son bo'lsa
-                            return sortStates[index] === 1 ? aValue - bValue : bValue - aValue;
-                            } else {
-                                // Matnlarni solishtirish
-                                return sortStates[index] === 1 
-                                    ? aValue.localeCompare(bValue)
-                                    : bValue.localeCompare(aValue);
-                            }
-                        });
-                    }
-
-                    // Jadvalning tartiblangan qatorlarini qayta joylashtirish
-                    tbody.innerHTML = "";
-                    rows.forEach(row => tbody.appendChild(row));
-                });
-            }
-        });
-    });
-
-
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const deleteModal = document.getElementById('deleteModal');
-        const deleteForm = document.getElementById('deleteForm');
-        deleteModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const employeeId = button.getAttribute('data-employee-id');
-            deleteForm.action = '{% url "delete_employees" 0 %}'.replace('/0/', '/' + employeeId + '/');
-        });
-    });
-
-    $(document).ready(function() { 
-        
-        $('#pageSize').on('change', function() {
-            var selectedPageSize = $(this).val();
-            window.location.href = "?page_size=" +
-            selectedPageSize; 
-        });
-    });
-</script>
-
-<script>
-   document.getElementById("export-excel").addEventListener("click", function () {
-    const search = document.getElementById("searchInput").value;
-    const katta = document.getElementById("kattaInput").value;
-    const kichik = document.getElementById("kichikInput").value;
-    const gender = document.getElementById("genderSelect").value;
-    const ilmiyDaraja = document.getElementById("ilmiyDarajaSelect").value;
-    const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect").value;
-    const kafedra = document.getElementById("departmentSelect").value;
-    const tugilgan_joy = document.getElementById("placeofbirthtSelect").value;
-    const permanents = document.getElementById("permanentSelect").value;
-
-    const queryParams = new URLSearchParams({
-        q: search,
-        katta: katta,
-        kichik: kichik,
-        gender: gender,
-        ilmiy_daraja: ilmiyDaraja,
-        ilmiy_unvon: ilmiyUnvon,
-        kafedra: kafedra,
-        placeofbirtht: tugilgan_joy,
-        permanent: permanents
-    });
-
-    fetch(`/api/employees/?${queryParams.toString()}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Serverdan noto'g'ri javob qaytdi");
-            }
-            return response.json();
-        })
-        .then(data => {
-            const employees = data.employees.map(employee => ({
-                Name: employee.name,
-                Gender: employee.gender,
-                Position: employee.position,
-                Department: employee.department,
-                ...
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(employees);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Xodimlar");
-            XLSX.writeFile(workbook, "Xodimlar_filter.xlsx");
-        })
-        .catch(error => {
-            console.error("Ma'lumotlarni olishda xatolik yuz berdi:", error);
-        });
-});
-
-</script> -->
 
 {% endblock content %}

@@ -24,8 +24,8 @@
                         <div class="row">
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="frist_name" class="form-label">Ism:</label>
-                                    <input type="text" id="frist_name" name="frist_name" class="form-control" value="{{ employee.frist_name }}" placeholder="Ism...">
+                                    <label for="first_name" class="form-label">Ism:</label>
+                                    <input type="text" id="first_name" name="first_name" class="form-control" value="{{ employee.first_name }}" placeholder="Ism...">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -42,26 +42,20 @@
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="employee_id" class="form-label">Hemis ID:</label>
-                                    <input type="text" id="employee_id" name="employee_id" class="form-control" value="{{ employee.employee_id }}" placeholder="Hemis ID...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="bithday" class="form-label">Tug'ilgan yil:</label>
-                                    <input type="text" id="bithday" name="bithday" class="form-control" value="{{ employee.bithday }}" placeholder="25.12.2024">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
                                     <label for="citizenship" class="form-label">Fuqaroligi:</label>
                                     <input type="text" id="citizenship" name="citizenship" class="form-control {% if error %}is-invalid{% endif %}" value="{{ employee.citizenship }}" placeholder="Fuqaroligi..."> 
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="passport" class="form-label">Passport rqami:</label>
-                                    <input type="text" id="passport" name="passport" class="form-control" value="{{ employee.passport }}" placeholder="Passport rqami...">
+                                    <label for="place_of_birth" class="form-label">Tug'ilgan joyi:</label>
+                                    <input type="text" id="place_of_birth" name="place_of_birth" class="form-control" value="{{ employee.place_of_birth }}" placeholder="Tug'ilgan joyi...">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="permanent_registration" class="form-label">Doimiy yashash joyi:</label>
+                                    <input type="text" id="permanent_registration" name="permanent_registration" class="form-control" value="{{ employee.permanent_registration }}" placeholder="Doimiy yashash joyi...">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -72,32 +66,50 @@
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="faculty" class="form-label">Fakultet:</label>
-                                    <input type="text" id="faculty" name="faculty" class="form-control" value="{{ employee.faculty }}" placeholder="Fakultet...">
+                                    <label for="bithday" class="form-label">Tug'ilgan yil/kun:</label>
+                                    <input type="text" id="bithday" name="bithday" class="form-control" value="{{ employee.bithday }}" placeholder="25.12.2024">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="department" class="form-label">Kafedra/Bo'lim:</label>
-                                    <input type="text" id="department" name="department" class="form-control" value="{{ employee.department }}" placeholder="Kafedra/Bo'lim...">
+                                    <label for="passport" class="form-label">Passport rqami:</label>
+                                    <input type="text" id="passport" name="passport" class="form-control" value="{{ employee.passport }}" placeholder="Passport rqami...">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="labor_form" class="form-label">Menhnat shakli:</label>
-                                    <input type="text" id="labor_form" name="labor_form" class="form-control" value="{{ employee.labor_form }}" placeholder="Menhnat shakli...">
+                                    <label for="nationality" class="form-label">Millati:</label>
+                                    <input type="text" id="nationality" name="nationality" class="form-control" value="{{ employee.nationality }}" placeholder="Millati...">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="stavka" class="form-label">Stavka:</label>
-                                    <input type="text" id="stavka" name="stavka" class="form-control" value="{{ employee.stavka }}" placeholder="Stavka...">
+                                    <label for="city" class="form-label">Tuman/Shahar:</label>
+                                    <input type="text" id="city" name="city" class="form-control" value="{{ employee.city }}" placeholder="Tuman/Shahar...">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="position" class="form-label">Lavozim:</label>
-                                    <input type="text" id="position" name="position" class="form-control" value="{{ employee.position }}" placeholder="Lavozim...">
+                                    <label for="phone" class="form-label">Telefoni:</label>
+                                    <input type="text" id="phone" name="phone" class="form-control" value="{{ employee.phone }}" placeholder="+998901234567">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email:</label>
+                                    <input type="tetx" id="email" name="email" class="form-control" value="{{ employee.email }}" placeholder="Email...">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="gender" class="form-label">Jinsi:</label>
+                                    <input type="text" id="gender" name="gender" class="form-control" value="{{ employee.gender }}" placeholder="Jinsi...">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="employee_id" class="form-label">Hemis ID:</label>
+                                    <input type="text" id="employee_id" name="employee_id" class="form-control" value="{{ employee.employee_id }}" placeholder="Hemis ID...">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -114,86 +126,8 @@
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="expertise" class="form-label">Mutaxasislik:</label>
-                                    <input type="text" id="expertise" name="expertise" class="form-control" value="{{ employee.expertise }}" placeholder="Mutaxasislik...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="start_position" class="form-label">Ishga kirgan yil:</label>
-                                    <input type="text" id="start_position" name="start_position" class="form-control" value="{{ employee.start_position }}" placeholder="2024">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="contract_number" class="form-label">Shartnoma raqami:</label>
-                                    <input type="text" id="contract_number" name="contract_number" class="form-control" value="{{ employee.contract_number }}" placeholder="Shartnoma raqami...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="contract_date" class="form-label">Shartnoma sanasi:</label>
-                                    <input type="text" id="contract_date" name="contract_date" class="form-control" value="{{ employee.contract_date }}" placeholder="21.12.2024">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="order_number" class="form-label">Buyruq raqami:</label>
-                                    <input type="text" id="order_number" name="order_number" class="form-control" value="{{ employee.order_number }}" placeholder="Buyruq raqami...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="order_date" class="form-label">Buyruq sanasi:</label>
-                                    <input type="text" id="order_date" name="order_date" class="form-control" value="{{ employee.order_date }}" placeholder="Buyruq sanasi...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="gender" class="form-label">Jinsi:</label>
-                                    <input type="text" id="gender" name="gender" class="form-control" value="{{ employee.gender }}" placeholder="Jinsi...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email:</label>
-                                    <input type="tetx" id="email" name="email" class="form-control" value="{{ employee.email }}" placeholder="Email...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">Telefoni:</label>
-                                    <input type="text" id="phone" name="phone" class="form-control" value="{{ employee.phone }}" placeholder="+998901234567">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="permanent_registration" class="form-label">Doimiy yashash joyi:</label>
-                                    <input type="text" id="permanent_registration" name="permanent_registration" class="form-control" value="{{ employee.permanent_registration }}" placeholder="Doimiy yashash joyi...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
                                     <label for="organization" class="form-label">Tashkiloti nomi:</label>
                                     <input type="text" id="organization" name="organization" class="form-control" value="{{ employee.organization }}" placeholder="Tashkiloti nomi...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="nationality" class="form-label">Millati:</label>
-                                    <input type="text" id="nationality" name="nationality" class="form-control" value="{{ employee.nationality }}" placeholder="Millati...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="place_of_birth" class="form-label">Tug'ilgan joyi:</label>
-                                    <input type="text" id="place_of_birth" name="place_of_birth" class="form-control" value="{{ employee.place_of_birth }}" placeholder="Tug'ilgan joyi...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="city" class="form-label">Tuman/Shahar:</label>
-                                    <input type="text" id="city" name="city" class="form-control" value="{{ employee.city }}" placeholder="Tuman/Shahar...">
                                 </div>
                             </div>
                             <div class="col-4">

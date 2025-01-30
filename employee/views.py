@@ -11,6 +11,8 @@ from employee.decorators import role_required # Ruxsatlarni tekshirish uchun
 from django.contrib.auth.decorators import login_required # Login bo'lishni tekshirish uchun
 from django.contrib.auth import login, logout, authenticate # Login, logout va authenticate uchun
 from employee.forms import LoginForm # Login formasi
+from itertools import groupby
+from operator import attrgetter
 
 def login_decorator(func):
     return login_required(func, login_url='user_login')
@@ -108,7 +110,6 @@ def upload_excel(request):
 
     return render(request, "admin/upload_excel.html")
 
-
 @login_decorator
 @role_required("download_user")
 def get_filtered_employees(request):
@@ -183,12 +184,23 @@ def export_employees_to_excel(request):
     # Ma'lumotlarni qo'shamiz
     employees = Employee.objects.all()
     for employee in employees:
+        departments = Departments.objects.filter(employees=employee)
+
+        # Takrorlanmas qiymatlarni olish uchun set() dan foydalanamiz
+        def get_unique_values(field_name):
+            values = set(departments.values_list(field_name, flat=True))
+            values.discard(None)  # None qiymatlarni olib tashlash
+            return ", ".join(values) if values else ""
+
         sheet.append([
             employee.employee_id, employee.citizenship, employee.passport, employee.personal_number,
-            employee.faculty, employee.department, employee.frist_name, employee.last_name,
-            employee.sur_name, employee.labor_form, employee.stavka, employee.position,
-            employee.academic_degree, employee.academic_title, employee.expertise, employee.start_position,
-            employee.contract_number, employee.contract_date, employee.order_number, employee.order_date,
+            get_unique_values("faculty"), get_unique_values("department"),
+            employee.first_name, employee.last_name, employee.sur_name,
+            get_unique_values("labor_form"), get_unique_values("stavka"),
+            get_unique_values("position"), employee.academic_degree, employee.academic_title,
+            get_unique_values("expertise"), get_unique_values("start_position"),
+            get_unique_values("contract_number"), get_unique_values("contract_date"),
+            get_unique_values("order_number"), get_unique_values("order_date"),
             employee.bithday, employee.age, employee.gender, employee.email, employee.phone,
             employee.permanent_registration, employee.organization, employee.nationality,
             employee.place_of_birth, employee.city, employee.graduation_end_year, employee.end_education
@@ -200,11 +212,10 @@ def export_employees_to_excel(request):
     workbook.save(response)
     return response
 
-
 @login_decorator
 @role_required("view_reports")
 def all_employees(request): 
-    employees = Employee.objects.prefetch_related("xodim").all().order_by('-id')  # Barcha xodimlarni olish
+    employees = Employee.objects.filter(xodim__isnull=False).distinct().prefetch_related("xodim").order_by('-id')  # Barcha xodimlarni olish
 
     query = request.GET.get('q', '')  # Qidiruv uchun so'rov
     katta_yosh = request.GET.get('katta', None)  # Katta yosh filtri
@@ -213,14 +224,16 @@ def all_employees(request):
     ilmiy_daraja = request.GET.get('ilmiy_daraja', None)  # Ilmiy daraja
     ilmiy_unvon = request.GET.get('ilmiy_unvon', None)  # Ilmiy unvon
     kafedra = request.GET.get('kafedra', None)  # kafedra
+    lavozim = request.GET.get('lavozim', None)  # kafedra
     tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
     permanent = request.GET.get('permanent', None)  # Doimiy yashash joyi
 
     academic_degree = Employee.objects.filter(academic_degree__isnull=False).values_list('academic_degree', flat=True).distinct() # Ilmiy darajalar
     academic_title = Employee.objects.filter(academic_title__isnull=False).values_list('academic_title', flat=True).distinct() # Ilmiy unvonlar
     department = Departments.objects.filter(department__isnull=False).values_list('department', flat=True).distinct() # Kafedralar
+    labor_form = Departments.objects.filter(labor_form__isnull=False).values_list('labor_form', flat=True).distinct() # Kafedralar
     place_of_birth = Employee.objects.filter(place_of_birth__isnull=False).values_list('place_of_birth', flat=True).distinct() # Tug'ilgan joylar
-    city = Employee.objects.filter(city__isnull=False).values_list('city', flat=True).distinct() # Doimiy yashash joyi
+    permanent_registration = Employee.objects.filter(permanent_registration__isnull=False).values_list('permanent_registration', flat=True).distinct() # Doimiy yashash joyi
     
     # Filtrlash
     if query:
@@ -244,46 +257,89 @@ def all_employees(request):
         employees = employees.filter(academic_title__icontains=ilmiy_unvon)  # Ilmiy unvon bo'yicha filtr
     if kafedra:
         employees = employees.filter(xodim__department__icontains=kafedra)  # Kafedra bo'yicha filtr
+    if lavozim:
+        employees = employees.filter(xodim__labor_form__icontains=lavozim)  # lavozim bo'yicha filtr
     if tugilgan_joyi:
         employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
     if permanent:
         employees = employees.filter(city__icontains=permanent) # Doimiy yashash joyi filtr
 
+    employee_data = []
+    for employee in employees:
+        departments = Departments.objects.filter(employees=employee)
+
+        employee_data.append({
+            "employee_id": employee.employee_id,
+            "fio": f"{employee.last_name} {employee.first_name}",
+            "sur_name":f"{employee.sur_name}",
+            "place_of_birth": employee.place_of_birth,
+            "academic_degree_title": f"{employee.academic_degree}, {employee.academic_title}",
+            "position": ", ".join(set(departments.values_list("position", flat=True))),
+            "labor_form": ", ".join(set(departments.values_list("labor_form", flat=True))),
+            "department": ", ".join(set(departments.values_list("department", flat=True))),
+            "age": employee.age,
+            "gender": employee.gender
+        })
+
     # Pagination
-    page_size = request.GET.get('page_size', 10)  # Default 10
-    paginator = Paginator(employees, page_size)
+    page_size = request.GET.get('page_size', 50)  # Default 10
+    paginator = Paginator(employee_data, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    print(page_obj)
     context = {
         'page_obj': page_obj,
         'segment': 'employee',
         "academic_degree": academic_degree,
         "academic_title": academic_title,
         "department": department,  # Kafedralar
+        "labor_form":labor_form,
         "place_of_birth": place_of_birth,  # Tug'ilgan joylar
-        "permanent_registration": city,  # Doimiy yashash joylar
+        "permanent_registration": permanent_registration,  # Doimiy yashash joylar
     }
     return render(request, 'employee/all_employees.html', context=context)
 
 
 @login_decorator
 @role_required("view_reports")
-def view_employees(request, employee_id): # Xodim ma'lumotlarini ko'rish
-    try: # Xodimni topish
-        employee = Employee.objects.filter(employee_id=employee_id).first() # Xodimni olish
+def view_employees(request, employee_id):  # Xodim ma'lumotlarini ko'rish
+    try:
+        # Xodimni olish
+        employee = Employee.objects.filter(employee_id=employee_id).first()
         user_data = get_employment_info(employee_id)
         user_info = user_data.get('data', {}).get('items', [])[0]
-
-    except Employee.DoesNotExist: # Agar xodim topilmasa
-        return HttpResponseNotFound("Xaodim topilmadi.") # 404 xatolikni chiqarish
+        
+        # Xodimga bog‘langan departments ma'lumotlarini olish va dublikatlarni yo'qotish
+        employee_data = []
+        departments = Departments.objects.filter(employees=employee)
+        
+        # None qiymatlariga tekshirish qo'shish
+        employee_data.append({
+            "faculty": ", ".join(filter(None, set(departments.values_list("faculty", flat=True)))),
+            "department": ", ".join(filter(None, set(departments.values_list("department", flat=True)))),
+            "labor_form": ", ".join(filter(None, set(departments.values_list("labor_form", flat=True)))),
+            "stavka": ", ".join(filter(None, set(departments.values_list("stavka", flat=True)))),
+            "position": ", ".join(filter(None, set(departments.values_list("position", flat=True)))),
+            "expertise": ", ".join(filter(None, set(departments.values_list("expertise", flat=True)))),
+            "start_position": ", ".join(filter(None, set(departments.values_list("start_position", flat=True)))),
+            "contract_number": ", ".join(filter(None, set(departments.values_list("contract_number", flat=True)))),
+            "contract_date": ", ".join(filter(None, set(departments.values_list("contract_date", flat=True)))),
+            "order_number": ", ".join(filter(None, set(departments.values_list("order_number", flat=True)))),
+            "order_date": ", ".join(filter(None, set(departments.values_list("order_date", flat=True)))),
+        })
     
-    context = {
-        "employee": employee, 'segment':'employee',
-        'user_info':user_info
-        }   # Context yaratish
+    except Employee.DoesNotExist:
+        return HttpResponseNotFound("Xodim topilmadi.")  # 404 xatolikni chiqarish
 
-    return render(request, "employee/view_employees.html", context=context) # Xodim ma'lumotlarini chiqarish
+    context = {
+        "employee": employee,
+        "segment": "employee",
+        "user_info": user_info,
+        "employee_data": employee_data,  # Xodim bog‘langan unikal departments
+    }
+
+    return render(request, "employee/view_employees.html", context=context)
+
+ # Xodim ma'lumotlarini chiqarish
 
 @login_decorator
 @role_required("add_user")
@@ -293,22 +349,11 @@ def add_employees(request): # Xodim qo'shish
         citizenship = request.POST.get("citizenship")
         passport = request.POST.get("passport")
         personal_number = request.POST.get("personal_number")
-        faculty = request.POST.get("faculty")
-        department = request.POST.get("department")
-        frist_name = request.POST.get("frist_name")
+        first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         sur_name = request.POST.get("sur_name")
-        labor_form = request.POST.get("labor_form")
-        stavka = request.POST.get("stavka")
-        position = request.POST.get("position")
         academic_degree = request.POST.get("academic_degree")
         academic_title = request.POST.get("academic_title")
-        expertise = request.POST.get("expertise")
-        start_position = request.POST.get("start_position")
-        contract_number = request.POST.get("contract_number")
-        contract_date = request.POST.get("contract_date")
-        order_number = request.POST.get("order_number")
-        order_date = request.POST.get("order_date")
         bithday = request.POST.get("bithday")
         gender = request.POST.get("gender")
         email = request.POST.get("email")
@@ -323,12 +368,8 @@ def add_employees(request): # Xodim qo'shish
         
         employee = Employee.objects.create(
             employee_id=employee_id, citizenship=citizenship, passport=passport, personal_number=personal_number,
-            faculty=faculty, department=department, frist_name=frist_name,
-            last_name=last_name, sur_name=sur_name, labor_form=labor_form,
-            stavka=stavka, position=position, academic_degree=academic_degree,
-            academic_title=academic_title, expertise=expertise, start_position=start_position,
-            contract_number=contract_number, contract_date=contract_date, order_number=order_number,
-            order_date=order_date, bithday=bithday, gender=gender,
+            first_name=first_name, last_name=last_name, sur_name=sur_name, academic_degree=academic_degree,
+            academic_title=academic_title, bithday=bithday, gender=gender,
             email=email, phone=phone, permanent_registration=permanent_registration,
             organization=organization, nationality=nationality, place_of_birth=place_of_birth,
             city=city, graduation_end_year=graduation_end_year, end_education=end_education,
