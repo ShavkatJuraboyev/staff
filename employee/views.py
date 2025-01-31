@@ -69,7 +69,7 @@ def upload_excel(request):
                     'citizenship': row[1],
                     'passport': row[2],
                     'personal_number': row[3],
-                    'frist_name': row[6],
+                    'first_name': row[6],
                     'last_name': row[7],
                     'sur_name': row[8],
                     'academic_degree': row[12],
