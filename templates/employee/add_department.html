@@ -1,0 +1,133 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}  
+{% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}  
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- DataTable with Buttons -->
+    <div class="card">
+        <div class="card-datatable table-responsive">
+            <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                <div class="container mt-5">
+                    <div class="head-label">
+                        <h4 class="card-title mb-0">Bo‘limni tahrirlash</h4>
+                    </div>
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="employees" class="form-label">Xodim</label>
+                            <select class="form-control" name="employees" id="employees" required>
+                                <option value="">Xodimni tanlang</option>
+                                {% for employee in employees %}
+                                <option value="{{ employee.id }}" 
+                                    {% if selected_employee and selected_employee.id == employee.id %} 
+                                        selected 
+                                    {% endif %}>
+                                    {{ employee.employee_id }} - {{ employee.first_name }} {{ employee.last_name }} {{ employee.sur_name }}
+                                </option>                                
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                
+                        <div class="mb-3">
+                            <label for="faculty" class="form-label">Fakultet</label>
+                            <input type="text" class="form-control" id="faculty" name="faculty" value="{{ department.faculty }}"  placeholder="Fakultet">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="department" class="form-label">Kafedra/Bo‘lim </label>
+                            <input type="text" class="form-control" id="department" name="department" value="{{ department.department }}" placeholder="Kafedra/Bo‘lim">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="labor_form" class="form-label">Mehnat shakli</label>
+                            <input type="text" class="form-control" id="labor_form" name="labor_form" value="{{ department.labor_form }}" placeholder="Mehnat shakli">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="stavka" class="form-label">Stavka</label>
+                            <input type="text" class="form-control" id="stavka" name="stavka" value="{{ department.stavka }}" placeholder="Stavka">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="position" class="form-label">Lavozim</label>
+                            <input type="text" class="form-control" id="position" name="position" value="{{ department.position }}" placeholder="Lavozim">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="expertise" class="form-label">Mutaxassislik</label>
+                            <input type="text" class="form-control" id="expertise" name="expertise" value="{{ department.expertise }}" placeholder="Mutaxassislik">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="start_position" class="form-label">Ishga kirgan sana</label>
+                            <input type="text" class="form-control" id="start_position" name="start_position" value="{{ department.start_position }}" placeholder="2025">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="contract_number" class="form-label">Shartnoma raqami</label>
+                            <input type="text" class="form-control" id="contract_number" name="contract_number" value="{{ department.contract_number }}" placeholder="Shartnoma raqami">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="contract_date" class="form-label">Shartnoma sanasi</label>
+                            <input type="text" class="form-control" id="contract_date" name="contract_date" value="{{ department.contract_date}}" placeholder="01.01.2025">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="order_number" class="form-label">Buyruq raqami</label>
+                            <input type="text" class="form-control" id="order_number" name="order_number" value="{{ department.order_number }}" placeholder="Buyruq raqami">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="order_date" class="form-label">Buyruq sanasi</label>
+                            <input type="text" class="form-control" id="order_date" name="order_date" value="{{ department.order_date}}" placeholder="01.01.2025">
+                        </div>
+                
+                        <button type="submit" class="btn btn-primary"><i class='bx bxs-save' ></i> Saqlash</button>
+                        <a href="{% url 'view_employees' employee_id %}" class="btn btn-primary"><i class='bx bx-left-arrow-alt'></i> Ortga</a>
+                        {% if department.id%} 
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bx bx-trash bx-md"></i> O'chirish
+                        </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% if department.id%} {% url 'delete_departments' department.id %}{% endif %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="bx bx-exclamation-circle text-warning"></i> Ishonchingiz komilmi?
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Ushbu Xodimni o'chirishni xohlaysizmi? <br>
+                    Ushbu amalni keyin qaytarib bo'lmaydi!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-danger">Ha, o'chirilsin!</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %} 

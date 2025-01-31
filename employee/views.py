@@ -1,5 +1,5 @@
 import openpyxl, requests, json # Excel fayllarini o'qish uchun kutubxona
-from django.shortcuts import render, redirect # render va redirect kutubxonasini import qilamiz
+from django.shortcuts import render, redirect,get_object_or_404 # render va redirect kutubxonasini import qilamiz
 from employee.models import Employee, Role, UserRole, Departments # Talabalar modelini import qilamiz
 from django.contrib import messages # Xabarlar uchun
 from django.db.models import Q # Q kutubxonasini import qilamiz
@@ -37,6 +37,16 @@ def user_login(request):
     else:
         forms = LoginForm()
     return render(request, 'admin/login.html')
+
+def get_employment_info(hemis_id): # Hemis ID bo'yicha ish joyi ma'lumotlarini olish
+    """Hemis id kiritilishi lozim"""
+    url = f"https://student.samtuit.uz/rest/v1/data/employee-list?type=all&search={hemis_id}" # API URL
+    token = "Y-R36P1BY-eLfuCwQbcbAlvt9GAMk-WP" # Token
+    headers = {"Authorization": "Bearer " + token} # Tokenni headerga qo'shish
+    response = requests.get(url, headers=headers) # API ga so'rov yuborish
+    if response.status_code == 200: # Agar so'rov muvaffaqiyatli bo'lsa
+        return response.json() # JSON ma'lumotlarni qaytarish
+    return None # Aks holda None qaytarish
 
 @login_decorator
 def logOut(request):
@@ -110,60 +120,54 @@ def upload_excel(request):
 
     return render(request, "admin/upload_excel.html")
 
-@login_decorator
-@role_required("download_user")
-def get_filtered_employees(request):
-    q = request.GET.get('q', '')
-    katta = request.GET.get('katta', None)
-    kichik = request.GET.get('kichik', None)
-    gender = request.GET.get('gender', '')
-    ilmiy_daraja = request.GET.get('ilmiy_daraja', '')
-    ilmiy_unvon = request.GET.get('ilmiy_unvon', '')
-    kafedra = request.GET.get('kafedra', '')  # kafedra
-    tugilgan_joyi = request.GET.get('placeofbirtht', '')
 
-    employees = Employee.objects.all()
-
-    if q:
-        employees = employees.filter(frist_name__icontains=q)
-    if katta:
-        employees = employees.filter(age__gte=katta)
-    if kichik:
-        employees = employees.filter(age__lte=kichik)
-    if gender:
-        employees = employees.filter(gender=gender)
-    if ilmiy_daraja:
-        employees = employees.filter(academic_degree=ilmiy_daraja)
-    if ilmiy_unvon:
-        employees = employees.filter(academic_title=ilmiy_unvon)
-    if kafedra:
-        employees = employees.filter(department=kafedra)  # Kafedra bo'yicha filtr
-    if tugilgan_joyi:
-        employees = employees.filter(place_of_birth=tugilgan_joyi)  # Tug'ilgan joyi filtr
-
-    data = list(employees.values(
-        'employee_id', 'citizenship', 'passport', 'personal_number', 'faculty', 'department', 
-        'frist_name', 'last_name', 'sur_name', 'labor_form', 'stavka', 'position', 
-        'academic_degree', 'academic_title', 'expertise', 'start_position', 
-        'contract_number', 'contract_date', 'order_number', 'order_date', 'bithday', 
-        'age', 'gender', 'email', 'phone', 'permanent_registration', 'organization', 
-        'nationality', 'place_of_birth', 'city', 'graduation_end_year', 'end_education'
-    ))
-    return JsonResponse({'employees': data})
-
-def get_employment_info(hemis_id): # Hemis ID bo'yicha ish joyi ma'lumotlarini olish
-    """Hemis id kiritilishi lozim"""
-    url = f"https://student.samtuit.uz/rest/v1/data/employee-list?type=all&search={hemis_id}" # API URL
-    token = "Y-R36P1BY-eLfuCwQbcbAlvt9GAMk-WP" # Token
-    headers = {"Authorization": "Bearer " + token} # Tokenni headerga qo'shish
-    response = requests.get(url, headers=headers) # API ga so'rov yuborish
-    if response.status_code == 200: # Agar so'rov muvaffaqiyatli bo'lsa
-        return response.json() # JSON ma'lumotlarni qaytarish
-    return None # Aks holda None qaytarish
 
 @login_decorator
 @role_required("download_user")
 def export_employees_to_excel(request):
+    query = request.GET.get('q', '')  # Qidiruv uchun so'rov
+    katta_yosh = request.GET.get('katta', None)  # Katta yosh filtri
+    kichik_yosh = request.GET.get('kichik', None)  # Kichik yosh filtri
+    gender = request.GET.get('gender', None)  # Jinsi
+    ilmiy_daraja = request.GET.get('ilmiy_daraja', None)  # Ilmiy daraja
+    ilmiy_unvon = request.GET.get('ilmiy_unvon', None)  # Ilmiy unvon
+    kafedra = request.GET.get('kafedra', None)  # kafedra
+    lavozim = request.GET.get('lavozim', None)  # kafedra
+    tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
+    permanent = request.GET.get('permanent', None)  # Doimiy yashash joyi
+
+    # Xodimlar ma'lumotlarini olish
+    employees = Employee.objects.filter(xodim__isnull=False).distinct().prefetch_related("xodim").order_by('-id')
+
+    # Filtrlash
+    if query:
+        employees = employees.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(sur_name__icontains=query) |
+            Q(employee_id__icontains=query) |
+            Q(phone__icontains=query) |
+            Q(age__icontains=query) 
+        )
+    if katta_yosh:
+        employees = employees.filter(age__gte=int(katta_yosh))  # Yoshdan katta
+    if kichik_yosh:
+        employees = employees.filter(age__lte=int(kichik_yosh))  # Yoshdan kichik
+    if gender:
+        employees = employees.filter(gender=gender)  # Jinsi bo'yicha filtr
+    if ilmiy_daraja:
+        employees = employees.filter(academic_degree__icontains=ilmiy_daraja)  # Ilmiy daraja bo'yicha filtr
+    if ilmiy_unvon:
+        employees = employees.filter(academic_title__icontains=ilmiy_unvon)  # Ilmiy unvon bo'yicha filtr
+    if kafedra:
+        employees = employees.filter(xodim__department__icontains=kafedra)  # Kafedra bo'yicha filtr
+    if lavozim:
+        employees = employees.filter(xodim__labor_form__icontains=lavozim)  # lavozim bo'yicha filtr
+    if tugilgan_joyi:
+        employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
+    if permanent:
+        employees = employees.filter(city__icontains=permanent) # Doimiy yashash joyi filtr
+
     # Excel faylni yaratamiz
     workbook = openpyxl.Workbook()
     sheet = workbook.active
@@ -182,17 +186,15 @@ def export_employees_to_excel(request):
     sheet.append(headers)
 
     # Ma'lumotlarni qo'shamiz
-    employees = Employee.objects.all()
     for employee in employees:
         departments = Departments.objects.filter(employees=employee)
 
-        # Takrorlanmas qiymatlarni olish uchun set() dan foydalanamiz
         def get_unique_values(field_name):
             values = set(departments.values_list(field_name, flat=True))
-            values.discard(None)  # None qiymatlarni olib tashlash
+            values.discard(None)
             return ", ".join(values) if values else ""
 
-        sheet.append([
+        sheet.append([  # Employee ma'lumotlarini qo'shamiz
             employee.employee_id, employee.citizenship, employee.passport, employee.personal_number,
             get_unique_values("faculty"), get_unique_values("department"),
             employee.first_name, employee.last_name, employee.sur_name,
@@ -208,7 +210,7 @@ def export_employees_to_excel(request):
 
     # Javob qaytarish
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response['Content-Disposition'] = 'attachment; filename=employees.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=employees_filtered.xlsx'
     workbook.save(response)
     return response
 
@@ -282,7 +284,7 @@ def all_employees(request):
         })
 
     # Pagination
-    page_size = request.GET.get('page_size', 50)  # Default 10
+    page_size = request.GET.get('page_size', 10)  # Default 10
     paginator = Paginator(employee_data, page_size)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -307,6 +309,8 @@ def view_employees(request, employee_id):  # Xodim ma'lumotlarini ko'rish
         employee = Employee.objects.filter(employee_id=employee_id).first()
         user_data = get_employment_info(employee_id)
         user_info = user_data.get('data', {}).get('items', [])[0]
+
+        departments = Departments.objects.filter(employees=employee_id)
         
         # Xodimga bog‘langan departments ma'lumotlarini olish va dublikatlarni yo'qotish
         employee_data = []
@@ -332,6 +336,7 @@ def view_employees(request, employee_id):  # Xodim ma'lumotlarini ko'rish
 
     context = {
         "employee": employee,
+        "departments": departments,
         "segment": "employee",
         "user_info": user_info,
         "employee_data": employee_data,  # Xodim bog‘langan unikal departments
@@ -390,22 +395,11 @@ def edit_employees(request, employee_id): # Xodim ma'lumotlarini tahrirlash
         employee.citizenship = request.POST.get("citizenship")
         employee.passport = request.POST.get("passport")
         employee.personal_number = request.POST.get("personal_number")
-        employee.faculty = request.POST.get("faculty")
-        employee.department = request.POST.get("department")
-        employee.frist_name = request.POST.get("frist_name")
+        employee.first_name = request.POST.get("first_name")
         employee.last_name = request.POST.get("last_name")
         employee.sur_name = request.POST.get("sur_name")
-        employee.labor_form = request.POST.get("labor_form")
-        employee.stavka = request.POST.get("stavka")
-        employee.position = request.POST.get("position")
         employee.academic_degree = request.POST.get("academic_degree")
         employee.academic_title = request.POST.get("academic_title")
-        employee.expertise = request.POST.get("expertise")
-        employee.start_position = request.POST.get("start_position")
-        employee.contract_number = request.POST.get("contract_number")
-        employee.contract_date = request.POST.get("contract_date")
-        employee.order_number = request.POST.get("order_number")
-        employee.order_date = request.POST.get("order_date")
         employee.bithday = request.POST.get("bithday")
         employee.gender = request.POST.get("gender")
         employee.email = request.POST.get("email")
@@ -417,7 +411,6 @@ def edit_employees(request, employee_id): # Xodim ma'lumotlarini tahrirlash
         employee.city = request.POST.get("city")
         employee.graduation_end_year = request.POST.get("graduation_end_year")
         employee.end_education = request.POST.get("end_education")
-
         employee.save() # Ma'lumotlarni saqlash
 
 
@@ -427,6 +420,119 @@ def edit_employees(request, employee_id): # Xodim ma'lumotlarini tahrirlash
         }
 
     return render(request, "employee/add_employees.html", context=context) # Xodim ma'lumotlarini tahrirlash sahifasini chiqarish
+
+@login_decorator
+@role_required("ubdate_user")
+def add_department(request, employee_id):
+    # Xodimlar ro‘yxatini olish
+    employees = Employee.objects.all()
+
+    # Agar employee_id berilgan bo‘lsa, tanlangan xodimni olish
+    if employee_id:
+        selected_employee = get_object_or_404(Employee, employee_id=employee_id)
+    else:
+        selected_employee = None
+
+    if request.method == "POST":
+        employee = Employee.objects.get(id=request.POST.get("employees"))
+        faculty = request.POST.get("faculty")
+        department_name = request.POST.get("department")
+        labor_form = request.POST.get("labor_form")
+        stavka = request.POST.get("stavka")
+        position = request.POST.get("position")
+        expertise = request.POST.get("expertise")
+        start_position = request.POST.get("start_position")
+        contract_number = request.POST.get("contract_number")
+        contract_date = request.POST.get("contract_date")
+        order_number = request.POST.get("order_number")
+        order_date = request.POST.get("order_date")
+
+        # Yangi bo'limni yaratish
+        Departments.objects.create(
+            employees=employee,
+            faculty=faculty,
+            department=department_name,
+            labor_form=labor_form,
+            stavka=stavka,
+            position=position,
+            expertise=expertise,
+            start_position=start_position,
+            contract_number=contract_number,
+            contract_date=contract_date,
+            order_number=order_number,
+            order_date=order_date
+        )
+
+        # Bo‘limlar ro‘yxatiga qaytish
+        return redirect("all_employees")
+
+    # Formani yaratish uchun kontekst
+    context = {
+        "employees": employees,
+        "selected_employee": selected_employee,  # Tanlangan xodimni uzatish
+        "segment": "department",
+        "employee_id":employee_id
+    }
+
+    return render(request, "employee/add_department.html", context=context)
+
+
+@login_decorator
+@role_required("ubdate_user")
+def edit_departments(request, department_id, employee_id):
+    department = Departments.objects.filter(id=department_id).first()
+    employees = Employee.objects.all()  # Xodimlarni olish
+
+    if employee_id:
+        selected_employee = get_object_or_404(Employee, employee_id=employee_id)
+    else:
+        selected_employee = None
+    
+    if request.method == "POST":
+        employees_id = request.POST.get("employees")
+        faculty = request.POST.get("faculty")
+        department_name = request.POST.get("department")
+
+        if not employees_id or not faculty or not department_name:
+            messages.error(request, "Barcha maydonlarni to‘ldirish majburiy!")
+            return redirect("edit_department", department_id=department.id)
+
+        department.employees = Employee.objects.filter(id=employees_id).first()
+        department.faculty = faculty
+        department.department = department_name
+        department.labor_form = request.POST.get("labor_form", "")
+        department.stavka = request.POST.get("stavka", "")
+        department.position = request.POST.get("position", "")
+        department.expertise = request.POST.get("expertise", "")
+        department.start_position = request.POST.get("start_position", "")
+        department.contract_number = request.POST.get("contract_number", "")
+        department.contract_date = request.POST.get("contract_date", None)
+        department.order_number = request.POST.get("order_number", "")
+        department.order_date = request.POST.get("order_date", None)
+
+        department.save()
+
+        messages.success(request, "Bo‘lim ma'lumotlari muvaffaqiyatli yangilandi.")
+        return redirect("all_employees")
+
+    context = {
+        "department": department,
+        "employees": employees,  # Xodimlar ro‘yxatini context ga qo‘shish
+        'segment': 'department', 
+        "selected_employee": selected_employee,
+        "employee_id":employee_id
+    }
+
+    return render(request, "employee/add_department.html", context=context)
+
+
+@login_decorator
+@role_required("delete_user")
+def delete_departments(request, employee_id): # Xodimni o'chirish
+    employee = Departments.objects.filter(id=employee_id).first() # Xodimni olish
+    employee.delete() # Xodimni o'chirish
+    return redirect("all_employees") # Talabalar ro'yxatiga yo'naltirish
+
 
 @login_decorator
 @role_required("delete_user")
