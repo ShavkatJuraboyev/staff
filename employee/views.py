@@ -120,8 +120,6 @@ def upload_excel(request):
 
     return render(request, "admin/upload_excel.html")
 
-
-
 @login_decorator
 @role_required("download_user")
 def export_employees_to_excel(request):
@@ -134,7 +132,7 @@ def export_employees_to_excel(request):
     kafedra = request.GET.get('kafedra', None)  # kafedra
     lavozim = request.GET.get('lavozim', None)  # kafedra
     tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
-    permanent = request.GET.get('permanent', None)  # Doimiy yashash joyi
+    city = request.GET.get('city', None)  # Doimiy yashash joyi
 
     # Xodimlar ma'lumotlarini olish
     employees = Employee.objects.filter(xodim__isnull=False).distinct().prefetch_related("xodim").order_by('-id')
@@ -165,8 +163,8 @@ def export_employees_to_excel(request):
         employees = employees.filter(xodim__labor_form__icontains=lavozim)  # lavozim bo'yicha filtr
     if tugilgan_joyi:
         employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
-    if permanent:
-        employees = employees.filter(city__icontains=permanent) # Doimiy yashash joyi filtr
+    if city:
+        employees = employees.filter(city__icontains=city) # Doimiy yashash joyi filtr
 
     # Excel faylni yaratamiz
     workbook = openpyxl.Workbook()
@@ -228,14 +226,14 @@ def all_employees(request):
     kafedra = request.GET.get('kafedra', None)  # kafedra
     lavozim = request.GET.get('lavozim', None)  # kafedra
     tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
-    permanent = request.GET.get('permanent', None)  # Doimiy yashash joyi
+    city = request.GET.get('city', None)  # Doimiy yashash joyi
 
     academic_degree = Employee.objects.filter(academic_degree__isnull=False).values_list('academic_degree', flat=True).distinct() # Ilmiy darajalar
     academic_title = Employee.objects.filter(academic_title__isnull=False).values_list('academic_title', flat=True).distinct() # Ilmiy unvonlar
     department = Departments.objects.filter(department__isnull=False).values_list('department', flat=True).distinct() # Kafedralar
     labor_form = Departments.objects.filter(labor_form__isnull=False).values_list('labor_form', flat=True).distinct() # Kafedralar
     place_of_birth = Employee.objects.filter(place_of_birth__isnull=False).values_list('place_of_birth', flat=True).distinct() # Tug'ilgan joylar
-    permanent_registration = Employee.objects.filter(permanent_registration__isnull=False).values_list('permanent_registration', flat=True).distinct() # Doimiy yashash joyi
+    city = Employee.objects.filter(city__isnull=False).values_list('city', flat=True).distinct() # Doimiy yashash joyi
     
     # Filtrlash
     if query:
@@ -263,8 +261,8 @@ def all_employees(request):
         employees = employees.filter(xodim__labor_form__icontains=lavozim)  # lavozim bo'yicha filtr
     if tugilgan_joyi:
         employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
-    if permanent:
-        employees = employees.filter(city__icontains=permanent) # Doimiy yashash joyi filtr
+    if city:
+        employees = employees.filter(city__icontains=city) # Doimiy yashash joyi filtr
 
     employee_data = []
     for employee in employees:
@@ -296,7 +294,7 @@ def all_employees(request):
         "department": department,  # Kafedralar
         "labor_form":labor_form,
         "place_of_birth": place_of_birth,  # Tug'ilgan joylar
-        "permanent_registration": permanent_registration,  # Doimiy yashash joylar
+        "city": city,  # Doimiy yashash joylar
     }
     return render(request, 'employee/all_employees.html', context=context)
 

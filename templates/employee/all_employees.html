@@ -152,13 +152,13 @@
                                 </label>
                             </div>
                             <div>
-                                <label>Doimiy yashash joyi
-                                    <select name="permanent" id="permanentSelect" class="form-select">
+                                <label>Tuman/Shahar
+                                    <select name="city" id="citySelect" class="form-select">
                                         <option value="">Hammasi</option>
-                                        {% for permanent_registr in permanent_registration %}
-                                        <option value="{{ permanent_registr }}"
-                                            {% if request.GET.permanent == permanent_registr %}selected{% endif %}>
-                                            {{ permanent_registr }}</option>
+                                        {% for cit in city %}
+                                        <option value="{{ cit }}"
+                                            {% if request.GET.city == cit %}selected{% endif %}>
+                                            {{ cit }}</option>
                                         {% endfor %}
                                     </select>
                                 </label>
@@ -504,6 +504,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect")?.value || "";
     const kafedra = document.getElementById("departmentSelect")?.value || "";
     const tugilgan_joy = document.getElementById("placeofbirthtSelect")?.value || "";
+    const lavozim = document.getElementById("laborSelect")?.value || "";
+    const city = document.getElementById("citySelect")?.value || "";
 
     // AJAX so'rov
     const queryParams = new URLSearchParams({
@@ -514,7 +516,9 @@ document.addEventListener("DOMContentLoaded", function() {
         ilmiy_daraja: ilmiyDaraja,
         ilmiy_unvon: ilmiyUnvon,
         kafedra: kafedra,
-        placeofbirtht: tugilgan_joy
+        placeofbirtht: tugilgan_joy,
+        lavozim: lavozim,
+        city: city
     });
 
     // Filterlangan ma'lumotlarni olish

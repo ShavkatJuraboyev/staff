@@ -56,7 +56,7 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.employee_id}-{self.first_name}"
-
+ 
 class Departments(models.Model):
     employees = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name="Xodimlar", related_name="xodim")
     faculty = models.CharField(max_length=100, null=True, blank=True, verbose_name="Fakulteti", help_text="Fakultetini kiritish lozim")
