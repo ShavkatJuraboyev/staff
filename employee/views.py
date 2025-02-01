@@ -226,7 +226,7 @@ def all_employees(request):
     kafedra = request.GET.get('kafedra', None)  # kafedra
     lavozim = request.GET.get('lavozim', None)  # kafedra
     tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
-    city = request.GET.get('city', None)  # Doimiy yashash joyi
+    citys = request.GET.get('city', None)  # Doimiy yashash joyi
 
     academic_degree = Employee.objects.filter(academic_degree__isnull=False).values_list('academic_degree', flat=True).distinct() # Ilmiy darajalar
     academic_title = Employee.objects.filter(academic_title__isnull=False).values_list('academic_title', flat=True).distinct() # Ilmiy unvonlar
@@ -261,7 +261,7 @@ def all_employees(request):
         employees = employees.filter(xodim__labor_form__icontains=lavozim)  # lavozim bo'yicha filtr
     if tugilgan_joyi:
         employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
-    if city:
+    if citys:
         employees = employees.filter(city__icontains=city) # Doimiy yashash joyi filtr
 
     employee_data = []
@@ -294,7 +294,7 @@ def all_employees(request):
         "department": department,  # Kafedralar
         "labor_form":labor_form,
         "place_of_birth": place_of_birth,  # Tug'ilgan joylar
-        "city": city,  # Doimiy yashash joylar
+        "city": city,  
     }
     return render(request, 'employee/all_employees.html', context=context)
 
