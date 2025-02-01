@@ -44,6 +44,9 @@ class Employee(models.Model):
     graduation_end_year = models.CharField(max_length=250, null=True, blank=True, verbose_name="Oliy ta'lim muassasasini tugatgan yili", help_text="Oliy ta'lim tugatgan yili")
     end_education = models.CharField(max_length=50, null=True, blank=True, verbose_name="Tugatgan oliy ta'limi nomi", help_text="Tugatgan oliy ta'limini kiritish lozim")
 
+    graduation_end_year_mag = models.CharField(max_length=250, null=True, blank=True, verbose_name="Oliy ta'lim muassasasini tugatgan yili (Magistrt)", help_text="Oliy ta'lim tugatgan yili")
+    end_education_mag = models.CharField(max_length=50, null=True, blank=True, verbose_name="Tugatgan oliy ta'limi nomi (Magistrt)", help_text="Tugatgan oliy ta'limini kiritish lozim")
+
     class Meta:
         verbose_name = "Xodimlar"
         verbose_name_plural = "Xodimlar ro'yxati"

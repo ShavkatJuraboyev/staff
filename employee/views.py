@@ -368,6 +368,9 @@ def add_employees(request): # Xodim qo'shish
         city = request.POST.get("city")
         graduation_end_year = request.POST.get("graduation_end_year")
         end_education = request.POST.get("end_education")
+        graduation_end_year_mag = request.POST.get("graduation_end_year_mag")
+        end_education_mag = request.POST.get("end_education_mag")
+        
         
         employee = Employee.objects.create(
             employee_id=employee_id, citizenship=citizenship, passport=passport, personal_number=personal_number,
@@ -376,6 +379,7 @@ def add_employees(request): # Xodim qo'shish
             email=email, phone=phone, permanent_registration=permanent_registration,
             organization=organization, nationality=nationality, place_of_birth=place_of_birth,
             city=city, graduation_end_year=graduation_end_year, end_education=end_education,
+            graduation_end_year_mag=graduation_end_year_mag, end_education_mag=end_education_mag,
         ) # Xodimni yaratish
 
         return redirect("all_employees")  # Talabalar ro'yxatiga yo'naltirish
@@ -409,6 +413,8 @@ def edit_employees(request, employee_id): # Xodim ma'lumotlarini tahrirlash
         employee.city = request.POST.get("city")
         employee.graduation_end_year = request.POST.get("graduation_end_year")
         employee.end_education = request.POST.get("end_education")
+        employee.graduation_end_year_mag = request.POST.get("graduation_end_year_mag")
+        employee.end_education_mag = request.POST.get("end_education_mag")
         employee.save() # Ma'lumotlarni saqlash
 
 

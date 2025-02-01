@@ -48,8 +48,14 @@
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="place_of_birth" class="form-label">Tug'ilgan joyi:</label>
+                                    <label for="place_of_birth" class="form-label">Tug'ilgan joyi (viloyat):</label>
                                     <input type="text" id="place_of_birth" name="place_of_birth" class="form-control" value="{{ employee.place_of_birth }}" placeholder="Tug'ilgan joyi...">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="city" class="form-label">Tuman/Shahar:</label>
+                                    <input type="text" id="city" name="city" class="form-control" value="{{ employee.city }}" placeholder="Tuman/Shahar...">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -80,12 +86,6 @@
                                 <div class="mb-3">
                                     <label for="nationality" class="form-label">Millati:</label>
                                     <input type="text" id="nationality" name="nationality" class="form-control" value="{{ employee.nationality }}" placeholder="Millati...">
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="mb-3">
-                                    <label for="city" class="form-label">Tuman/Shahar:</label>
-                                    <input type="text" id="city" name="city" class="form-control" value="{{ employee.city }}" placeholder="Tuman/Shahar...">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -132,14 +132,26 @@
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="graduation_end_year" class="form-label">Oliy ta'lim muassasasini tugatgan yili:</label>
+                                    <label for="graduation_end_year" class="form-label">Oliy ta'lim muassasasini tugatgan yili (Bakalavr):</label>
                                     <input type="text" id="graduation_end_year" name="graduation_end_year" class="form-control" value="{{ employee.graduation_end_year }}" placeholder="Oliy ta'lim muassasasini tugatgan yili...">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="end_education" class="form-label">Tugatgan oliy ta'limi nomi:</label>
+                                    <label for="end_education" class="form-label">Tugatgan oliy ta'limi nomi (Bakalavr):</label>
                                     <input type="text" id="end_education" name="end_education" class="form-control" value="{{ employee.end_education }}" placeholder="Tugatgan oliy ta'limi nomi...">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="graduation_end_year_mag" class="form-label">Oliy ta'lim muassasasini tugatgan yili (Magistr):</label>
+                                    <input type="text" id="graduation_end_year_mag" name="graduation_end_year_mag" class="form-control" value="{{ employee.graduation_end_year_mag }}" placeholder="Oliy ta'lim muassasasini tugatgan yili...">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="end_education_mag" class="form-label">Tugatgan oliy ta'limi nomi (Magistr):</label>
+                                    <input type="text" id="end_education_mag" name="end_education_mag" class="form-control" value="{{ employee.end_education_mag }}" placeholder="Tugatgan oliy ta'limi nomi...">
                                 </div>
                             </div>
                         </div>
