@@ -262,7 +262,7 @@ def all_employees(request):
     if tugilgan_joyi:
         employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
     if citys:
-        employees = employees.filter(city__icontains=city) # Doimiy yashash joyi filtr
+        employees = employees.filter(city__icontains=citys) # Doimiy yashash joyi filtr
 
     employee_data = []
     for employee in employees:
