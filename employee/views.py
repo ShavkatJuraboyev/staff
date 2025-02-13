@@ -133,6 +133,7 @@ def export_employees_to_excel(request):
     lavozim = request.GET.get('lavozim', None)  # kafedra
     tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
     city = request.GET.get('city', None)  # Doimiy yashash joyi
+    position = request.GET.get('position', None)
 
     # Xodimlar ma'lumotlarini olish
     employees = Employee.objects.filter(xodim__isnull=False).distinct().prefetch_related("xodim").order_by('-id')
@@ -165,6 +166,8 @@ def export_employees_to_excel(request):
         employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
     if city:
         employees = employees.filter(city__icontains=city) # Doimiy yashash joyi filtr
+    if position:
+        employees = employees.filter(xodim__position__icontains=position)
 
     # Excel faylni yaratamiz
     workbook = openpyxl.Workbook()
@@ -227,6 +230,7 @@ def all_employees(request):
     lavozim = request.GET.get('lavozim', None)  # kafedra
     tugilgan_joyi = request.GET.get('placeofbirtht', None)  # viloyati
     citys = request.GET.get('city', None)  # Doimiy yashash joyi
+    position = request.GET.get('position', None)
 
     academic_degree = Employee.objects.filter(academic_degree__isnull=False).values_list('academic_degree', flat=True).distinct() # Ilmiy darajalar
     academic_title = Employee.objects.filter(academic_title__isnull=False).values_list('academic_title', flat=True).distinct() # Ilmiy unvonlar
@@ -234,6 +238,7 @@ def all_employees(request):
     labor_form = Departments.objects.filter(labor_form__isnull=False).values_list('labor_form', flat=True).distinct() # Kafedralar
     place_of_birth = Employee.objects.filter(place_of_birth__isnull=False).values_list('place_of_birth', flat=True).distinct() # Tug'ilgan joylar
     city = Employee.objects.filter(city__isnull=False).values_list('city', flat=True).distinct() # Doimiy yashash joyi
+    positions =Departments.objects.filter(position__isnull=False).values_list('position', flat=True).distinct()
     
     # Filtrlash
     if query:
@@ -263,6 +268,9 @@ def all_employees(request):
         employees = employees.filter(place_of_birth__icontains=tugilgan_joyi)  # Tug'ilgan joyi filtr
     if citys:
         employees = employees.filter(city__icontains=citys) # Doimiy yashash joyi filtr
+    if position:
+        employees = employees.filter(xodim__position__icontains=position)
+
 
     employee_data = []
     for employee in employees:
@@ -294,10 +302,11 @@ def all_employees(request):
         "department": department,  # Kafedralar
         "labor_form":labor_form,
         "place_of_birth": place_of_birth,  # Tug'ilgan joylar
-        "city": city,  
+        "city": city, 
+        "positions":positions, 
     }
     return render(request, 'employee/all_employees.html', context=context)
-
+ 
 
 @login_decorator
 @role_required("view_reports")

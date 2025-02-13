@@ -140,12 +140,24 @@
                                 </label>
                             </div>
                             <div>
-                                <label>Lavozim
+                                <label>Ish joyi
                                     <select name="lavozim" id="laborSelect" class="form-select">
                                         <option value="">Hammasi</option>
                                         {% for labor in labor_form %}
                                         <option value="{{ labor }}"
                                             {% if request.GET.lavozim == labor %}selected{% endif %}>{{ labor }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </div>
+                            <div>
+                                <label>Lavozim
+                                    <select name="position" id="positionSelect" class="form-select">
+                                        <option value="">Hammasi</option>
+                                        {% for position in positions %}
+                                        <option value="{{ position }}"
+                                            {% if request.GET.position == position %}selected{% endif %}>{{ position }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -422,26 +434,27 @@
         });
     }
 
-document.addEventListener("DOMContentLoaded", function() {
-    let filterForm = document.getElementById("filter-form");
-    let pageSizeSelect = document.getElementById("pageSize");
+    document.addEventListener("DOMContentLoaded", function() {
+        let filterForm = document.getElementById("filter-form");
+        let pageSizeSelect = document.getElementById("pageSize");
 
-    // Filtrlar va qidiruvni yuborish
-    filterForm.addEventListener("submit", function(event) {
-        event.preventDefault();  // Formani yubormaslik
-        let urlParams = new URLSearchParams(window.location.search);
-        let formData = new FormData(filterForm);
-        formData.forEach((value, key) => {
-            urlParams.set(key, value);  // Formdan olingan qiymatlarni URLga qo'shish
+        // Filtrlar va qidiruvni yuborish
+        filterForm.addEventListener("submit", function(event) {
+            event.preventDefault();  // Formani yubormaslik
+            let urlParams = new URLSearchParams(window.location.search);
+            let formData = new FormData(filterForm);
+            formData.forEach((value, key) => {
+                urlParams.set(key, value);  // Formdan olingan qiymatlarni URLga qo'shish
+            });
+
+            // Sahifa o'lchamini URLga qo'shish
+            urlParams.set('page_size', pageSizeSelect.value);
+
+            // Yangi URL'ni shakllantirib, uni navigatsiya qilish
+            window.location.search = urlParams.toString();
         });
-
-        // Sahifa o'lchamini URLga qo'shish
-        urlParams.set('page_size', pageSizeSelect.value);
-
-        // Yangi URL'ni shakllantirib, uni navigatsiya qilish
-        window.location.search = urlParams.toString();
     });
-});
+        
     // Filtrlar bilan jadvalni yangilash funksiyasi
     function setupFilterForm() {
         const filterForm = document.getElementById("filter-form");
@@ -494,48 +507,50 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Excel eksport qilish funksiyasi
- document.getElementById("export-excel").addEventListener("click", function () {
-    // Formdagi qiymatlarni olish
-    const search = document.getElementById("searchInput")?.value || "";
-    const katta = document.getElementById("kattaInput")?.value || "";
-    const kichik = document.getElementById("kichikInput")?.value || "";
-    const gender = document.getElementById("genderSelect")?.value || "";
-    const ilmiyDaraja = document.getElementById("ilmiyDarajaSelect")?.value || "";
-    const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect")?.value || "";
-    const kafedra = document.getElementById("departmentSelect")?.value || "";
-    const tugilgan_joy = document.getElementById("placeofbirthtSelect")?.value || "";
-    const lavozim = document.getElementById("laborSelect")?.value || "";
-    const city = document.getElementById("citySelect")?.value || "";
+    document.getElementById("export-excel").addEventListener("click", function () {
+        // Formdagi qiymatlarni olish
+        const search = document.getElementById("searchInput")?.value || "";
+        const katta = document.getElementById("kattaInput")?.value || "";
+        const kichik = document.getElementById("kichikInput")?.value || "";
+        const gender = document.getElementById("genderSelect")?.value || "";
+        const ilmiyDaraja = document.getElementById("ilmiyDarajaSelect")?.value || "";
+        const ilmiyUnvon = document.getElementById("ilmiyUnvonSelect")?.value || "";
+        const kafedra = document.getElementById("departmentSelect")?.value || "";
+        const tugilgan_joy = document.getElementById("placeofbirthtSelect")?.value || "";
+        const lavozim = document.getElementById("laborSelect")?.value || "";
+        const city = document.getElementById("citySelect")?.value || "";
+        const position = document.getElementById("positionSelect")?.value || "";
 
-    // AJAX so'rov
-    const queryParams = new URLSearchParams({
-        q: search,
-        katta: katta,
-        kichik: kichik,
-        gender: gender,
-        ilmiy_daraja: ilmiyDaraja,
-        ilmiy_unvon: ilmiyUnvon,
-        kafedra: kafedra,
-        placeofbirtht: tugilgan_joy,
-        lavozim: lavozim,
-        city: city
-    });
-
-    // Filterlangan ma'lumotlarni olish
-    fetch(`/export/employees/?${queryParams.toString()}`)
-        .then(response => response.blob())
-        .then(data => {
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(data);
-            link.download = "Xodimlar_filter.xlsx";
-            link.click();
-        })
-        .catch(error => {
-            console.error("Ma'lumotlarni olishda xatolik yuz berdi:", error);
+        // AJAX so'rov
+        const queryParams = new URLSearchParams({
+            q: search,
+            katta: katta,
+            kichik: kichik,
+            gender: gender,
+            ilmiy_daraja: ilmiyDaraja,
+            ilmiy_unvon: ilmiyUnvon,
+            kafedra: kafedra,
+            placeofbirtht: tugilgan_joy,
+            lavozim: lavozim,
+            city: city,
+            position:position,
         });
-});
+
+        // Filterlangan ma'lumotlarni olish
+        fetch(`/export/employees/?${queryParams.toString()}`)
+            .then(response => response.blob())
+            .then(data => {
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(data);
+                link.download = "Xodimlar_filter.xlsx";
+                link.click();
+            })
+            .catch(error => {
+                console.error("Ma'lumotlarni olishda xatolik yuz berdi:", error);
+            });
+    });
 
 </script>
 
-
+ 
 {% endblock content %}

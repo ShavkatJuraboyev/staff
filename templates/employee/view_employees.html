@@ -34,8 +34,13 @@
                     <p><strong>Millati:</strong> {{employee.nationality}}</p>
                     <p><strong>Tug'ilgan joyi:</strong> {{ employee.place_of_birth }}</p>
                     <p><strong>Tuman yoki Shaxar:</strong> {{ employee.city }}</p>
-                    <p><strong>Tugatgan oliy ta'limi nomi:</strong> {{ employee.end_education }}</p>
+                    {% if employee.end_education_mag %}
+                    <p><strong>Tugatgan oliy ta'limi nomi (Magistrt):</strong> {{ employee.end_education_mag}}</p> 
+                    <p><strong>Oliy ta'lim muassasasini tugatgan yili (Magistrt):</strong> {{ employee.end_education_mag }}</p>
+                    {% else %}
+                    <p><strong>Tugatgan oliy ta'limi nomi:</strong> {{ employee.end_education }}</p> 
                     <p><strong>Oliy ta'lim muassasasini tugatgan yili:</strong> {{ employee.graduation_end_year }}</p>
+                    {% endiif %}
                 </div>
                 <div class="col-3">
                     {% for department in employee_data %}
