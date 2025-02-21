@@ -21,7 +21,7 @@ class UserRole(models.Model):
         return f"{self.user.username} - {self.role.name}"
 
 class Employee(models.Model):
-    employee_id = models.CharField(max_length=50, null=True, blank=True, verbose_name="Xodim ID", help_text="Xodim ID", unique=True)
+    employee_id = models.IntegerField(max_length=50, null=True, blank=True, verbose_name="Xodim ID", help_text="Xodim ID", unique=True)
     citizenship = models.CharField(max_length=100, null=True, blank=True, verbose_name="Fuqaroligi", help_text="Fuqaroligini kirting")
     passport = models.CharField(max_length=9, null=True, blank=True, verbose_name="Passport seriyasi", help_text="Passport seriyasini kiritish lozim")
     personal_number = models.CharField(max_length=14, null=True, blank=True, verbose_name="Shaxsiy raqami (JSHER)", help_text="Shaxsiy raqamini kiritish lozim")

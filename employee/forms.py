@@ -47,3 +47,9 @@ class EmployeeForm(forms.ModelForm):
         if personal_number and len(personal_number) != 14:
             raise forms.ValidationError("Shaxsiy raqam (JSHER) 14 ta belgidan iborat bo‘lishi kerak.")
         return personal_number
+    
+    def clean_employee_id(self):
+        employee_id = self.cleaned_data.get('employee_id')
+        if Employee.objects.filter(employee_id=employee_id).exists():
+            raise forms.ValidationError("Bu Hemis ID allaqachon mavjud!")
+        return employee_id
