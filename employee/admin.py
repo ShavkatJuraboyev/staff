@@ -1,10 +1,10 @@
 from django.contrib import admin
 from employee.models import Employee, Role, UserRole, Departments
-
+ 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = ('employee_id', 'first_name', 'last_name', 'phone', 'academic_degree', 'academic_title', 'age')
-    list_filter = ('employee_id','academic_degree', 'academic_title')
+    list_filter = ('place_of_birth','academic_degree', 'academic_title', 'city')
     search_fields = ('employee_id', 'first_name', 'last_name',)
 
 
