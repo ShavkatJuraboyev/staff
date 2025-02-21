@@ -53,8 +53,16 @@ class Employee(models.Model):
 
     def save(self, *args, **kwargs):
         if self.bithday:
-            birth_date = datetime.strptime(self.bithday, "%d.%m.%Y")
-            self.age = datetime.now().year - birth_date.year
+            try:
+                birth_date = datetime.strptime(self.bithday, "%d.%m.%Y")
+                self.bithday = birth_date.strftime("%d.%m.%Y")  # Formatni saqlab qolamiz
+                
+                # Yoshni hisoblaymiz
+                today = datetime.now()
+                self.age = today.year - birth_date.year
+            except ValueError:
+                raise ValueError(f"Tug‘ilgan sana noto‘g‘ri formatda: {self.bithday}. To‘g‘ri format: DD.MM.YYYY")
+        
         super(Employee, self).save(*args, **kwargs)
 
     def __str__(self):

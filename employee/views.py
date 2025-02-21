@@ -1,18 +1,17 @@
-import openpyxl, requests, json # Excel fayllarini o'qish uchun kutubxona
+import openpyxl, requests # Excel fayllarini o'qish uchun kutubxona
 from django.shortcuts import render, redirect,get_object_or_404 # render va redirect kutubxonasini import qilamiz
 from employee.models import Employee, Role, UserRole, Departments # Talabalar modelini import qilamiz
 from django.contrib import messages # Xabarlar uchun
 from django.db.models import Q # Q kutubxonasini import qilamiz
 from django.core.paginator import Paginator # Paginator kutubxonasini import qilamiz
-from django.http import HttpResponseNotFound, HttpResponse, JsonResponse # 404 xatolikni chiqarish uchun
+from django.http import HttpResponseNotFound, HttpResponse # 404 xatolikni chiqarish uchun
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 from employee.decorators import role_required # Ruxsatlarni tekshirish uchun
 from django.contrib.auth.decorators import login_required # Login bo'lishni tekshirish uchun
 from django.contrib.auth import login, logout, authenticate # Login, logout va authenticate uchun
-from employee.forms import LoginForm # Login formasi
-from itertools import groupby
-from operator import attrgetter
+from employee.forms import LoginForm, EmployeeForm # Login formasi
+
 
 def login_decorator(func):
     return login_required(func, login_url='user_login')
@@ -218,7 +217,7 @@ def export_employees_to_excel(request):
 @login_decorator
 @role_required("view_reports")
 def all_employees(request): 
-    employees = Employee.objects.filter(xodim__isnull=False).distinct().prefetch_related("xodim").order_by('-id')  # Barcha xodimlarni olish
+    employees = Employee.objects.all().distinct().prefetch_related("xodim").order_by('-id')  # Barcha xodimlarni olish
 
     query = request.GET.get('q', '')  # Qidiruv uchun so'rov
     katta_yosh = request.GET.get('katta', None)  # Katta yosh filtri
@@ -355,45 +354,18 @@ def view_employees(request, employee_id):  # Xodim ma'lumotlarini ko'rish
 
 @login_decorator
 @role_required("add_user")
-def add_employees(request): # Xodim qo'shish
-    if request.method == "POST": # POST so'rovni tekshirish
-        employee_id = request.POST.get("employee_id")
-        citizenship = request.POST.get("citizenship")
-        passport = request.POST.get("passport")
-        personal_number = request.POST.get("personal_number")
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        sur_name = request.POST.get("sur_name")
-        academic_degree = request.POST.get("academic_degree")
-        academic_title = request.POST.get("academic_title")
-        bithday = request.POST.get("bithday")
-        gender = request.POST.get("gender")
-        email = request.POST.get("email")
-        phone = request.POST.get("phone")
-        permanent_registration = request.POST.get("permanent_registration")
-        organization = request.POST.get("organization")
-        nationality = request.POST.get("nationality")
-        place_of_birth = request.POST.get("place_of_birth")
-        city = request.POST.get("city")
-        graduation_end_year = request.POST.get("graduation_end_year")
-        end_education = request.POST.get("end_education")
-        graduation_end_year_mag = request.POST.get("graduation_end_year_mag")
-        end_education_mag = request.POST.get("end_education_mag")
-        
-        
-        employee = Employee.objects.create(
-            employee_id=employee_id, citizenship=citizenship, passport=passport, personal_number=personal_number,
-            first_name=first_name, last_name=last_name, sur_name=sur_name, academic_degree=academic_degree,
-            academic_title=academic_title, bithday=bithday, gender=gender,
-            email=email, phone=phone, permanent_registration=permanent_registration,
-            organization=organization, nationality=nationality, place_of_birth=place_of_birth,
-            city=city, graduation_end_year=graduation_end_year, end_education=end_education,
-            graduation_end_year_mag=graduation_end_year_mag, end_education_mag=end_education_mag,
-        ) # Xodimni yaratish
+def add_employees(request):  # Xodim qo'shish
+    if request.method == "POST":
+        form = EmployeeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Xodim muvaffaqiyatli qo'shildi!")
+            return redirect("all_employees")  # Xodimlar ro‘yxatiga yo‘naltirish
+    else:
+        form = EmployeeForm()
 
-        return redirect("all_employees")  # Talabalar ro'yxatiga yo'naltirish
-    context = {'segment':'employee'} 
-    return render(request, "employee/add_employees.html", context=context) # Xodim qo'shish sahifasini chiqarish
+    context = {'form': form, 'segment': 'employee'}
+    return render(request, "employee/add_employees.html", context)
 
 @login_decorator
 @role_required("ubdate_user")

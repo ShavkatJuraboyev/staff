@@ -73,9 +73,17 @@
                             <div class="col-4">
                                 <div class="mb-3">
                                     <label for="bithday" class="form-label">Tug'ilgan yil/kun:</label>
-                                    <input type="text" id="bithday" name="bithday" class="form-control" value="{{ employee.bithday }}" placeholder="25.12.2024">
+                                    <input type="text" id="bithday" name="bithday" class="form-control {% if form.errors.bithday %}is-invalid{% endif %}"
+                                           value="{{ employee.bithday }}" placeholder="25.12.2024"
+                                           pattern="\d{2}\.\d{2}\.\d{4}" title="Sanani DD.MM.YYYY formatida kiriting, masalan: 25.12.2024">
+                                    {% if form.errors.bithday %}
+                                        <div class="invalid-feedback">
+                                            {{ form.errors.bithday }}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
+                            
                             <div class="col-4">
                                 <div class="mb-3">
                                     <label for="passport" class="form-label">Passport rqami:</label>
@@ -192,6 +200,14 @@
         </div>
     </div>
 </div>
-
+<script>
+    document.getElementById('bithday').addEventListener('input', function (e) {
+        let val = e.target.value.replace(/\D/g, ''); // Faqat raqamlarni olish
+        if (val.length >= 2) val = val.slice(0, 2) + '.' + val.slice(2);
+        if (val.length >= 5) val = val.slice(0, 5) + '.' + val.slice(5);
+        e.target.value = val.slice(0, 10); // Maksimal uzunlik 10 ta belgidan oshmasin
+    });
+    </script>
+    
 {% endblock content %}
     
